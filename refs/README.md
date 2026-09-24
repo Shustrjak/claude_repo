@@ -4,7 +4,7 @@
 Сами эти три банка — базовая линия, поэтому в список не входят. Исключение — их открытые дизайн-системы (раздел C).
 
 **Как пользоваться.** У каждого референса есть номер `R01`…`R62`. Отметь решение в колонке «Решение»:
-`✅` — берём, `❌` — не берём, `🟡` — берём частично. Что именно берём, пиши в «Комментарий»
+`✅` — берём, `❌` — не берём, `🟡` — берём частично, `🔍` — на рассмотрении. Что именно берём, пиши в «Комментарий»
 или в разделе [«Решения»](#решения) в конце файла. Можно просто ответить в чате, например: «R03 — онбординг берём, R12 — только экран перевода».
 
 > Превью-картинки в репозиторий не скачаны: из окружения, где собиралась подборка, закрыт доступ к Dribbble, Behance и Figma CDN.
@@ -44,57 +44,57 @@
 | R03 | **Nubank / Nu México**: [разбор онбординга (Revolut, Nubank, Monzo)](https://craftinnovations.global/banking-onboarding-best-practices-revolut-nubank-monzo/) | Главный конкурент Plata в Мексике, модель «кредитка прежде всего» | Минималистичный онбординг, экран кредитной карты, простые тексты | ✅ | Всё, что попадает в scope: проверка адреса по индексу, 18+, KYC селфи + документ, несколько виртуальных карт со своими лимитами, одноразовая карта на 24 ч, выбор даты платежа, изменение лимита, пополнение мобильного |
 | R04 | **Klar** (Мексика): [обзор](https://neobanque.ch/app/klar/), [сравнение с Bleap](https://www.bleap.finance/en-us/blog/bleap-vs-klar) | Прямой конкурент Plata: дебет, кредитка, рассрочка, кешбэк | Оплата счетов (ЖКХ, связь), уровни Plus и Platino, кешбэк | 🟡 | Только положительный функционал: кешбэк по категориям и уровням, рассрочка до 24 мес., накопительный счёт, оплата услуг |
 | R05 | **Stori** (Мексика): [Klar vs Stori](https://www.cbinsights.com/compare/klar-vs-stori-1) | Стартовая кредитка для клиентов без кредитной истории, как у Plata | Выдача кредитки с маленьким лимитом, рост лимита | ❌ | Полезного нет: там в основном сравнение экономических моделей |
-| R06 | **Monobank** (Украина): [Red Dot Award](https://www.red-dot.org/project/monobank-49241), [файл в Figma Community](https://www.figma.com/community/file/1117140325872342568/monobank) | Самый близкий по духу к Т-Банку: только мобильный банк, кредитка, кешбэк, «Банки»-копилки | Маскот-кот, живые тексты, 123 квеста, «Банка» с публичной ссылкой для сбора денег | ⬜ | |
-| R07 | **Kaspi.kz** (Казахстан): [HBR: как проектировали суперапп](https://hbr.org/2025/07/the-ceo-of-kaspi-kz-on-designing-an-essential-superapp), [кейс Qorus](https://www.qorusglobal.com/content/19076-kaspikz-the-super-app-transforming-central-asias-digital-landscape) | Суперапп: платежи, маркетплейс, госуслуги, QR | Структура супераппа, платежи и QR, связка банка с маркетплейсом | ⬜ | |
+| R06 | **Monobank** (Украина): [Red Dot Award](https://www.red-dot.org/project/monobank-49241), [файл в Figma Community](https://www.figma.com/community/file/1117140325872342568/monobank) | Самый близкий по духу к Т-Банку: только мобильный банк, кредитка, кешбэк, «Банки»-копилки | Маскот-кот, живые тексты, 123 квеста, «Банка» с публичной ссылкой для сбора денег | ❌ | Не берём |
+| R07 | **Kaspi.kz** (Казахстан): [HBR: как проектировали суперапп](https://hbr.org/2025/07/the-ceo-of-kaspi-kz-on-designing-an-essential-superapp), [кейс Qorus](https://www.qorusglobal.com/content/19076-kaspikz-the-super-app-transforming-central-asias-digital-landscape) | Суперапп: платежи, маркетплейс, госуслуги, QR | Структура супераппа, платежи и QR, связка банка с маркетплейсом | ❌ | Не берём |
 | R08 | **N26**: [разбор паттернов Monobank, Revolut, Monzo и N26](https://www.flatstudio.co/blog/neobank-ux-patterns-daily-banking) | Spaces (подсчета со своим IBAN) | Подсчета и копилки, минималистичная главная | ✅ | Копилки (Spaces), округление покупок, общие копилки, заморозка и лимиты карты, мгновенные переводы, push на каждую операцию, статистика |
-| R09 | **Ozon Банк**: [запуск финансовой аналитики (Хабр)](https://habr.com/ru/news/976624/), [мобильное приложение на WebView (Хабр)](https://habr.com/ru/companies/ozontech/articles/828186/) | Российский цифровой банк внутри экосистемы | Экран аналитики финансов, единый UI на всех платформах | ⬜ | |
+| R09 | **Ozon Банк**: [запуск финансовой аналитики (Хабр)](https://habr.com/ru/news/976624/), [мобильное приложение на WebView (Хабр)](https://habr.com/ru/companies/ozontech/articles/828186/) | Российский цифровой банк внутри экосистемы | Экран аналитики финансов, единый UI на всех платформах | ❌ | Не берём |
 | R10 | **Банк Plata, официальная страница приложения**: [platacard.mx/en/app](https://platacard.mx/en/app), [Google Play](https://play.google.com/store/apps/details?id=dif.tech.plata&hl=en_US) | Базовая линия по Plata, для сверки функций | Рассрочка 3–12 мес. на покупки от 100 MXN, кешбэк до 15% по выбранным категориям, заморозка карты | ✅ | Кредитка, льготный период до 60 дней, рассрочка 3/6/12, выбор до 4 категорий кешбэка, способы потратить кешбэк, заморозка, поиск кешбэка и рассрочки |
 
 ## B. Концепты на Dribbble
 
 | № | Референс | Что показано | Решение | Комментарий |
 |---|---|---|---|---|
-| R11 | [RAY® Mobile Banking от OOZE](https://dribbble.com/shots/15858301-RAY-Mobile-Banking) | Управление деньгами, разделение трат, накопления на покупки. 465k просмотров | ⬜ | |
-| R12 | [Citadele app от Glow](https://dribbble.com/shots/19256131-Citadele-app-mobile-banking-neobank) | Реальный банк (Латвия), простой и чистый UI | ⬜ | |
-| R13 | [Banking App Design Concept от Ronas IT](https://dribbble.com/shots/22712147-Banking-App-Design-Concept) | Тёмная тема, карты на главной, последние операции, экран перевода | ⬜ | |
-| R14 | [Banking App Concept от Dmitry Lauretsky (Ronas IT)](https://dribbble.com/shots/19983133-Banking-App-Concept) | Яркие карты на тёмном монохромном фоне, флоу перевода | ⬜ | |
-| R15 | [Bank App Concept: UI/UX от Ronas IT](https://dribbble.com/shots/22565033-Bank-App-Concept-UI-UX) | Приветственный экран, экран карты (выбор дизайна, переводы), аналитика расходов | ⬜ | |
-| R16 | [Banking App Concept от Ronas IT](https://dribbble.com/shots/22082848-Banking-App-Concept) | Ещё один вариант главной и карт | ⬜ | |
-| R17 | [Banking App Main Screen Redesign от Wahiq Iqbal](https://dribbble.com/shots/22894552-Banking-App-Main-Screen-Redesign) | Редизайн главного экрана | ⬜ | |
-| R18 | [Mobile Banking App от Shakuro](https://dribbble.com/shots/23716865-Mobile-Banking-App) | Тёмная тема, матовое стекло, светящиеся кнопки | ⬜ | |
-| R19 | [Banking App Concept от Conceptzilla (Shakuro)](https://dribbble.com/shots/17143826-Banking-App-Concept) | Концепт главной и операций | ⬜ | |
-| R20 | [Neobanking Mobile App от Agilie](https://dribbble.com/shots/24809720-Neobanking-Mobile-App) | Необанк целиком, 208k просмотров | ⬜ | |
-| R21 | [Neobanking Mobile App Interactions от Agilie](https://dribbble.com/shots/24848696-Neobanking-Mobile-App-Interactions) | Анимации и микровзаимодействия | ⬜ | |
-| R22 | [Neo Bank Dashboards, коллекция Blott](https://dribbble.com/blott/collections/5699192-Neo-Bank-Dashboards) | Подборка дашбордов необанков | ⬜ | |
-| R23 | [Тег neobank-app, лента](https://dribbble.com/tags/neobank-app) | Свежие шоты по необанкам (лента меняется) | ⬜ | |
-| R24 | [Onboarding for banking от Anastasia Golovko](https://dribbble.com/shots/14482215-Onboarding-for-banking-Mobile-App) | Онбординг банковского приложения | ⬜ | |
-| R25 | [Fintech App for Smart Savings Goals от Ronas IT](https://dribbble.com/shots/26587675-Fintech-Mobile-App-for-Smart-Savings-Goals) | Цели и копилки | ⬜ | |
-| R26 | [Piggy Bank, детский цифровой банк от Phenomenon](https://dribbble.com/shots/24402668-Piggy-Bank-Mobile-App-UI-UX-Design-for-a-Kids-Digital-Bank) | Копилка с визуализацией роста, детская карта (как в Т-Банке и Альфе) | ⬜ | |
-| R27 | [Credit Card App от Sreevenkatesh Jayaraman](https://dribbble.com/shots/6509829-Credit-Card-App) | Управление кредитной картой | ⬜ | |
-| R28 | [Тег cashback, лента](https://dribbble.com/tags/cashback) | Экраны кешбэка и выбора категорий | ⬜ | |
-| R29 | [Тег credit-card-app, лента](https://dribbble.com/tags/credit-card-app) | Кредитки, лимиты, рассрочка | ⬜ | |
+| R11 | [RAY® Mobile Banking от OOZE](https://dribbble.com/shots/15858301-RAY-Mobile-Banking) | Управление деньгами, разделение трат, накопления на покупки. 465k просмотров | ❌ | Не берём |
+| R12 | [Citadele app от Glow](https://dribbble.com/shots/19256131-Citadele-app-mobile-banking-neobank) | Реальный банк (Латвия), простой и чистый UI | ❌ | Не берём |
+| R13 | [Banking App Design Concept от Ronas IT](https://dribbble.com/shots/22712147-Banking-App-Design-Concept) | Тёмная тема, карты на главной, последние операции, экран перевода | 🟡 | Только концепт оформления (визуальный стиль) |
+| R14 | [Banking App Concept от Dmitry Lauretsky (Ronas IT)](https://dribbble.com/shots/19983133-Banking-App-Concept) | Яркие карты на тёмном монохромном фоне, флоу перевода | ❌ | Не берём |
+| R15 | [Bank App Concept: UI/UX от Ronas IT](https://dribbble.com/shots/22565033-Bank-App-Concept-UI-UX) | Приветственный экран, экран карты (выбор дизайна, переводы), аналитика расходов | ❌ | Не берём |
+| R16 | [Banking App Concept от Ronas IT](https://dribbble.com/shots/22082848-Banking-App-Concept) | Ещё один вариант главной и карт | ❌ | Не берём |
+| R17 | [Banking App Main Screen Redesign от Wahiq Iqbal](https://dribbble.com/shots/22894552-Banking-App-Main-Screen-Redesign) | Редизайн главного экрана | ❌ | Не берём |
+| R18 | [Mobile Banking App от Shakuro](https://dribbble.com/shots/23716865-Mobile-Banking-App) | Тёмная тема, матовое стекло, светящиеся кнопки | ❌ | Не берём |
+| R19 | [Banking App Concept от Conceptzilla (Shakuro)](https://dribbble.com/shots/17143826-Banking-App-Concept) | Концепт главной и операций | ❌ | Не берём |
+| R20 | [Neobanking Mobile App от Agilie](https://dribbble.com/shots/24809720-Neobanking-Mobile-App) | Необанк целиком, 208k просмотров | ❌ | Не берём |
+| R21 | [Neobanking Mobile App Interactions от Agilie](https://dribbble.com/shots/24848696-Neobanking-Mobile-App-Interactions) | Анимации и микровзаимодействия | ❌ | Не берём |
+| R22 | [Neo Bank Dashboards, коллекция Blott](https://dribbble.com/blott/collections/5699192-Neo-Bank-Dashboards) | Подборка дашбордов необанков | ❌ | Не берём |
+| R23 | [Тег neobank-app, лента](https://dribbble.com/tags/neobank-app) | Свежие шоты по необанкам (лента меняется) | ❌ | Не берём |
+| R24 | [Onboarding for banking от Anastasia Golovko](https://dribbble.com/shots/14482215-Onboarding-for-banking-Mobile-App) | Онбординг банковского приложения | ❌ | Не берём |
+| R25 | [Fintech App for Smart Savings Goals от Ronas IT](https://dribbble.com/shots/26587675-Fintech-Mobile-App-for-Smart-Savings-Goals) | Цели и копилки | ❌ | Не берём |
+| R26 | [Piggy Bank, детский цифровой банк от Phenomenon](https://dribbble.com/shots/24402668-Piggy-Bank-Mobile-App-UI-UX-Design-for-a-Kids-Digital-Bank) | Копилка с визуализацией роста, детская карта (как в Т-Банке и Альфе) | ❌ | Не берём |
+| R27 | [Credit Card App от Sreevenkatesh Jayaraman](https://dribbble.com/shots/6509829-Credit-Card-App) | Управление кредитной картой | ❌ | Не берём |
+| R28 | [Тег cashback, лента](https://dribbble.com/tags/cashback) | Экраны кешбэка и выбора категорий | ❌ | Не берём |
+| R29 | [Тег credit-card-app, лента](https://dribbble.com/tags/credit-card-app) | Кредитки, лимиты, рассрочка | ❌ | Не берём |
 
 ## C. Дизайн-системы банков и Figma-файлы с ними
 
 | № | Референс | Что даёт | Решение | Комментарий |
 |---|---|---|---|---|
-| R30 | [Альфа-Банк core-components на GitHub](https://github.com/alfa-laboratory/core-components) | Открытая UI-библиотека Альфы (React, Storybook), настоящие компоненты банка | ⬜ | |
-| R31 | [Альфа-Банк, дизайн-система Feather](https://adele.uxpin.com/alfa-bank-feather) | Описание дизайн-системы Альфы | ⬜ | |
-| R32 | [Alfa Bank, файл в Figma Community](https://www.figma.com/community/file/779265086574105939/alfa-bank) | Экраны приложения Альфы в Figma | ⬜ | |
-| R33 | [Taiga UI (Т-Банк)](https://taiga-ui.dev/), [Taiga 3.0 в Figma](https://www.figma.com/community/file/1220308188005380608/taiga-3-0) | Открытый UI-кит Т-Банка (Angular) с тёмной темой из коробки | ⬜ | |
-| R34 | [Tinkoff Form Design System в Figma](https://www.figma.com/community/file/1154254456236039086/tinkoff-form-design-system) | Формы в стиле сайта Т-Банка | ⬜ | |
-| R35 | [«Тестовое задание / Тинькофф» в Figma](https://www.figma.com/community/file/1264202898301557844) | Пример экранов в стиле Т-Банка | ⬜ | |
+| R30 | [Альфа-Банк core-components на GitHub](https://github.com/alfa-laboratory/core-components) | Открытая UI-библиотека Альфы (React, Storybook), настоящие компоненты банка | ✅ | Основа каркаса. Документация: [Storybook, «Начало работы»](https://alfa-laboratory.github.io/core-components/master/?path=/docs/%D0%B3%D0%B0%D0%B9%D0%B4%D0%BB%D0%B0%D0%B9%D0%BD%D1%8B-%D0%BD%D0%B0%D1%87%D0%B0%D0%BB%D0%BE-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B--page). Репозиторий переехал в [core-ds/core-components](https://github.com/core-ds/core-components). npm: `@alfalab/core-components`, React 16–19 |
+| R31 | [Альфа-Банк, дизайн-система Feather](https://adele.uxpin.com/alfa-bank-feather) | Описание дизайн-системы Альфы | ❌ | Мёртвая ссылка |
+| R32 | [Alfa Bank, файл в Figma Community](https://www.figma.com/community/file/779265086574105939/alfa-bank) | Экраны приложения Альфы в Figma | 🔍 | На рассмотрении |
+| R33 | [Taiga UI (Т-Банк)](https://taiga-ui.dev/), [Taiga 3.0 в Figma](https://www.figma.com/community/file/1220308188005380608/taiga-3-0) | Открытый UI-кит Т-Банка (Angular) с тёмной темой из коробки | ✅ | Под каркас. npm: `@taiga-ui/core`, Angular 19+ |
+| R34 | [Tinkoff Form Design System в Figma](https://www.figma.com/community/file/1154254456236039086/tinkoff-form-design-system) | Формы в стиле сайта Т-Банка | ❌ | Не берём |
+| R35 | [«Тестовое задание / Тинькофф» в Figma](https://www.figma.com/community/file/1264202898301557844) | Пример экранов в стиле Т-Банка | ❌ | Не берём |
 
 ## D. Кейсы на Behance
 
 | № | Референс | Что показано | Решение | Комментарий |
 |---|---|---|---|---|
-| R36 | [rebank, цифровой банк](https://www.behance.net/gallery/176160923/rebank-digital-bank-app-uxui) | Молодёжный банк из Аргентины. Около 5k апрув, полный кейс с GIF | ⬜ | |
-| R37 | [Velora, Finance & Bank App](https://www.behance.net/gallery/235567799/Velora-Finance-Bank-App-UIUX-Case-Study) | Бюджеты, платежи, инвестиции. 2025 год | ⬜ | |
-| R38 | [Fin i, UX-кейс и редизайн](https://www.behance.net/gallery/196435681/UX-Case-study-UI-Redesign-of-Fin-i-Banking-app) | Процесс редизайна от исследования до UI | ⬜ | |
-| R39 | [Monobank App Product Rethinking от Artem Pravda](https://www.behance.net/gallery/113442449/Monobank-App-Product-Rethinking-(UXUIUCD)) | Переосмысление Монобанка | ⬜ | |
-| R40 | [Redesign Monobank от Tanya Nazarenko](https://www.behance.net/gallery/221022825/Redesign-Monobank-UXUI-Case-Study) | Ещё один редизайн Монобанка | ⬜ | |
-| R41 | [Поиск «Альфа банк» на Behance](https://www.behance.net/search/projects/%D0%90%D0%BB%D1%8C%D1%84%D0%B0%20%D0%B1%D0%B0%D0%BD%D0%BA) и [поиск «Тинькофф»](https://www.behance.net/search/projects/?search=%D0%A2%D0%B8%D0%BD%D1%8C%D0%BA%D0%BE%D1%84%D1%84) | Концепты и редизайны Альфы и Т-Банка от дизайнеров | ⬜ | |
+| R36 | [rebank, цифровой банк](https://www.behance.net/gallery/176160923/rebank-digital-bank-app-uxui) | Молодёжный банк из Аргентины. Около 5k апрув, полный кейс с GIF | ❌ | Не берём |
+| R37 | [Velora, Finance & Bank App](https://www.behance.net/gallery/235567799/Velora-Finance-Bank-App-UIUX-Case-Study) | Бюджеты, платежи, инвестиции. 2025 год | ❌ | Не берём |
+| R38 | [Fin i, UX-кейс и редизайн](https://www.behance.net/gallery/196435681/UX-Case-study-UI-Redesign-of-Fin-i-Banking-app) | Процесс редизайна от исследования до UI | ✅ | Карта приложения скачана, будет передана для проработки экранов |
+| R39 | [Monobank App Product Rethinking от Artem Pravda](https://www.behance.net/gallery/113442449/Monobank-App-Product-Rethinking-(UXUIUCD)) | Переосмысление Монобанка | ❌ | Не берём |
+| R40 | [Redesign Monobank от Tanya Nazarenko](https://www.behance.net/gallery/221022825/Redesign-Monobank-UXUI-Case-Study) | Ещё один редизайн Монобанка | ❌ | Не берём |
+| R41 | [Поиск «Альфа банк» на Behance](https://www.behance.net/search/projects/%D0%90%D0%BB%D1%8C%D1%84%D0%B0%20%D0%B1%D0%B0%D0%BD%D0%BA) и [поиск «Тинькофф»](https://www.behance.net/search/projects/?search=%D0%A2%D0%B8%D0%BD%D1%8C%D0%BA%D0%BE%D1%84%D1%84) | Концепты и редизайны Альфы и Т-Банка от дизайнеров | ❌ | Не берём |
 
 ## E. Бесплатные UI-киты в Figma Community (можно брать компоненты)
 
@@ -141,7 +141,7 @@
 
 ## Решения
 
-Решения по R01–R10 проставлены в таблице выше и перенесены в [`ROADMAP.md`](../ROADMAP.md).
+Решения по R01–R41 проставлены в таблице выше и перенесены в [`ROADMAP.md`](../ROADMAP.md).
 
 Шаблон, скопируй нужные строки:
 
