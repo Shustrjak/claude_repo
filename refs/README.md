@@ -39,16 +39,16 @@
 
 | № | Референс | Почему похож | Что смотреть | Решение | Комментарий |
 |---|---|---|---|---|---|
-| R01 | **Revolut**: [записи флоу на Page Flows](https://pageflows.com/ios/products/revolut/), [онбординг на Mobbin](https://mobbin.com/explore/flows/633b424d-a942-466c-a0ac-32d67d15033c) | Суперапп как Т-Банк: карты, мультивалюта, кешбэк, инвестиции, путешествия | Аналитика трат, чипсы с быстрыми действиями, мультивалютные счета, виртуальные карты | ⬜ | |
-| R02 | **Monzo**: [флоу на Page Flows](https://pageflows.com/ios/products/monzo/), [экраны на Page Flows](https://pageflows.com/screens/mobile/product/monzo/), [выписки на Mobbin](https://mobbin.com/flows/278e1a5b-d5c0-46b5-9d1c-54053626e232) | Дневной банкинг, «горшки» (Pots) как копилки | Лента операций с логотипами мерчантов, Summary с кольцевыми диаграммами бюджета, Pots | ⬜ | |
-| R03 | **Nubank / Nu México**: [разбор онбординга (Revolut, Nubank, Monzo)](https://craftinnovations.global/banking-onboarding-best-practices-revolut-nubank-monzo/) | Главный конкурент Plata в Мексике, модель «кредитка прежде всего» | Минималистичный онбординг, экран кредитной карты, простые тексты | ⬜ | |
-| R04 | **Klar** (Мексика): [обзор](https://neobanque.ch/app/klar/), [сравнение с Bleap](https://www.bleap.finance/en-us/blog/bleap-vs-klar) | Прямой конкурент Plata: дебет, кредитка, рассрочка, кешбэк | Оплата счетов (ЖКХ, связь), уровни Plus и Platino, кешбэк | ⬜ | |
-| R05 | **Stori** (Мексика): [Klar vs Stori](https://www.cbinsights.com/compare/klar-vs-stori-1) | Стартовая кредитка для клиентов без кредитной истории, как у Plata | Выдача кредитки с маленьким лимитом, рост лимита | ⬜ | |
+| R01 | **Revolut**: [записи флоу на Page Flows](https://pageflows.com/ios/products/revolut/), [онбординг на Mobbin](https://mobbin.com/explore/flows/633b424d-a942-466c-a0ac-32d67d15033c) | Суперапп как Т-Банк: карты, мультивалюта, кешбэк, инвестиции, путешествия | Аналитика трат, чипсы с быстрыми действиями, мультивалютные счета, виртуальные карты | ✅ | Регистрация и вход по телефону, OTP, страна и список стран, адрес, имя/фамилия/почта, дата рождения, уведомления, пароль + повтор; экраны физ./вирт. карт, «кому отправить», банки получателя, страница счёта |
+| R02 | **Monzo**: [флоу на Page Flows](https://pageflows.com/ios/products/monzo/), [экраны на Page Flows](https://pageflows.com/screens/mobile/product/monzo/), [выписки на Mobbin](https://mobbin.com/flows/278e1a5b-d5c0-46b5-9d1c-54053626e232) | Дневной банкинг, «горшки» (Pots) как копилки | Лента операций с логотипами мерчантов, Summary с кольцевыми диаграммами бюджета, Pots | 🟡 | Экран главного счёта с меню «…» (выбор опций) |
+| R03 | **Nubank / Nu México**: [разбор онбординга (Revolut, Nubank, Monzo)](https://craftinnovations.global/banking-onboarding-best-practices-revolut-nubank-monzo/) | Главный конкурент Plata в Мексике, модель «кредитка прежде всего» | Минималистичный онбординг, экран кредитной карты, простые тексты | ✅ | Всё, что попадает в scope: проверка адреса по индексу, 18+, KYC селфи + документ, несколько виртуальных карт со своими лимитами, одноразовая карта на 24 ч, выбор даты платежа, изменение лимита, пополнение мобильного |
+| R04 | **Klar** (Мексика): [обзор](https://neobanque.ch/app/klar/), [сравнение с Bleap](https://www.bleap.finance/en-us/blog/bleap-vs-klar) | Прямой конкурент Plata: дебет, кредитка, рассрочка, кешбэк | Оплата счетов (ЖКХ, связь), уровни Plus и Platino, кешбэк | 🟡 | Только положительный функционал: кешбэк по категориям и уровням, рассрочка до 24 мес., накопительный счёт, оплата услуг |
+| R05 | **Stori** (Мексика): [Klar vs Stori](https://www.cbinsights.com/compare/klar-vs-stori-1) | Стартовая кредитка для клиентов без кредитной истории, как у Plata | Выдача кредитки с маленьким лимитом, рост лимита | ❌ | Полезного нет: там в основном сравнение экономических моделей |
 | R06 | **Monobank** (Украина): [Red Dot Award](https://www.red-dot.org/project/monobank-49241), [файл в Figma Community](https://www.figma.com/community/file/1117140325872342568/monobank) | Самый близкий по духу к Т-Банку: только мобильный банк, кредитка, кешбэк, «Банки»-копилки | Маскот-кот, живые тексты, 123 квеста, «Банка» с публичной ссылкой для сбора денег | ⬜ | |
 | R07 | **Kaspi.kz** (Казахстан): [HBR: как проектировали суперапп](https://hbr.org/2025/07/the-ceo-of-kaspi-kz-on-designing-an-essential-superapp), [кейс Qorus](https://www.qorusglobal.com/content/19076-kaspikz-the-super-app-transforming-central-asias-digital-landscape) | Суперапп: платежи, маркетплейс, госуслуги, QR | Структура супераппа, платежи и QR, связка банка с маркетплейсом | ⬜ | |
-| R08 | **N26**: [разбор паттернов Monobank, Revolut, Monzo и N26](https://www.flatstudio.co/blog/neobank-ux-patterns-daily-banking) | Spaces (подсчета со своим IBAN) | Подсчета и копилки, минималистичная главная | ⬜ | |
+| R08 | **N26**: [разбор паттернов Monobank, Revolut, Monzo и N26](https://www.flatstudio.co/blog/neobank-ux-patterns-daily-banking) | Spaces (подсчета со своим IBAN) | Подсчета и копилки, минималистичная главная | ✅ | Копилки (Spaces), округление покупок, общие копилки, заморозка и лимиты карты, мгновенные переводы, push на каждую операцию, статистика |
 | R09 | **Ozon Банк**: [запуск финансовой аналитики (Хабр)](https://habr.com/ru/news/976624/), [мобильное приложение на WebView (Хабр)](https://habr.com/ru/companies/ozontech/articles/828186/) | Российский цифровой банк внутри экосистемы | Экран аналитики финансов, единый UI на всех платформах | ⬜ | |
-| R10 | **Банк Plata, официальная страница приложения**: [platacard.mx/en/app](https://platacard.mx/en/app), [Google Play](https://play.google.com/store/apps/details?id=dif.tech.plata&hl=en_US) | Базовая линия по Plata, для сверки функций | Рассрочка 3–12 мес. на покупки от 100 MXN, кешбэк до 15% по выбранным категориям, заморозка карты | ⬜ | |
+| R10 | **Банк Plata, официальная страница приложения**: [platacard.mx/en/app](https://platacard.mx/en/app), [Google Play](https://play.google.com/store/apps/details?id=dif.tech.plata&hl=en_US) | Базовая линия по Plata, для сверки функций | Рассрочка 3–12 мес. на покупки от 100 MXN, кешбэк до 15% по выбранным категориям, заморозка карты | ✅ | Кредитка, льготный период до 60 дней, рассрочка 3/6/12, выбор до 4 категорий кешбэка, способы потратить кешбэк, заморозка, поиск кешбэка и рассрочки |
 
 ## B. Концепты на Dribbble
 
@@ -140,6 +140,8 @@
 ---
 
 ## Решения
+
+Решения по R01–R10 проставлены в таблице выше и перенесены в [`ROADMAP.md`](../ROADMAP.md).
 
 Шаблон, скопируй нужные строки:
 
