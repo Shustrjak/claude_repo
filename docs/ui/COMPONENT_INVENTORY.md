@@ -24,7 +24,7 @@
 |---|---|---|
 | `Button` | `button` | Основа для `ActionButton` |
 | `IconButton` | `icon-button` | Кнопки в шапке: назад, поиск, уведомления |
-| `Input` | `input` | Текстовые поля: комментарий, поиск, UPI ID, счёт |
+| `Input` | `input` | Текстовые поля: комментарий, поиск, номер счёта, БИК |
 | `PhoneInput` | `intl-phone-input` | PAY-04; возможно AUTH-02 [R] |
 | `AmountInput` | `amount-input` | Сумма платежа |
 | `Money` | `amount` | Отображение суммы и баланса с валютой |
@@ -65,7 +65,7 @@
 |---|---|---|
 | `AppShell` | — (своя раскладка на `Stack`) | Каркас экрана: шапка, содержимое и нижняя навигация. Вариант `auth` — без нижней навигации, вариант `main` — с ней [A] |
 | `AppHeader` | `navigation-bar` | Шапка: заголовок, кнопка «назад», действия справа |
-| `BottomNavigation` | `tab-bar` | Нижняя навигация (узел N19). Пункты: Home, Pay, Scan QR, Settings, UPI Functions [S] |
+| `BottomNavigation` | `tab-bar` | Нижняя навигация (узел N19). Пункты: Home, Pay, Scan QR, Settings, Функции СБП (на схеме UPI Functions) [S] |
 
 ## Слой B — семантические компоненты
 
@@ -83,7 +83,7 @@
 | 8 | `TransactionRow` | Одна операция |
 | 9 | `TransactionList` | Список операций: `compact` или `full` |
 | 10 | `BankCard` | Изображение карты и её статус |
-| 11 | `PaymentMethodSelector` | Способы оплаты: QR, телефон, UPI ID, счёт |
+| 11 | `PaymentMethodSelector` | Способы перевода: QR, телефон, счёт. UPI ID — кандидат (Q-23) |
 | 12 | `RecipientInput` | Ввод получателя под тип получателя |
 | 13 | `RecipientSelector` | Выбор получателя из контактов и недавних. **Отложен**: есть только в ROADMAP [R] |
 | 14 | `PaymentForm` | Получатель, сумма, комментарий и проверка полей |
@@ -130,24 +130,24 @@
 |---|---|---|---|
 | `AppShell`, `AppHeader` | Все экраны | 30 + PST | Все |
 | `BottomNavigation` | HOME-01 и другие экраны после входа [A] | — | G, H |
-| `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-05, PAY-06, PAY-08, SET-02, PST-01, PST-02, PST-03 | 13 | A, B, C, D, E |
+| `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, SBP-03, SET-02, PST-01, PST-02, PST-03; PAY-05 — кандидат | 12 | A, B, C, D, E |
 | `ListRow` | AUTH-06, HOME-04, ACC-01, ACC-07, PAY-02, CARD-01, SET-01, SET-03 | 8 | B, E, F, G |
 | `AsyncContent` | HOME-01, HOME-02, HOME-03, ACC-01, ACC-02, ACC-03, CARD-01, SVC-03, NOTIF-01 | 9 | G |
 | `StatusMessage` | AUTH-01, HOME-02, ACC-02, ACC-03, PAY-03, SVC-03, NOTIF-01, SET-03 и все экраны с `AsyncContent` | 8+ | Все |
-| `PaymentForm` | PAY-04, PAY-05, PAY-06; PAY-02 и PAY-03 [A] | 3–5 | C, D |
-| `RecipientInput` | PAY-04, PAY-05, PAY-06 | 3 | C, D |
-| `PaymentSummary` | PAY-04, PAY-05, PAY-06, PST-01, PST-02 | 5 | C, D |
+| `PaymentForm` | PAY-04, PAY-06; PAY-02 и PAY-03 [A]; PAY-05 — кандидат | 2–4 | C, D |
+| `RecipientInput` | PAY-04, PAY-06; PAY-05 — кандидат | 2 | C, D |
+| `PaymentSummary` | PAY-04, PAY-06, PST-01, PST-02 | 4 | C, D |
 | `PaymentConfirmation` | PST-01 — общий шаг для PAY-02…06 | 1 состояние, 5 флоу | C, D |
-| `OperationStatus` | AUTH-04, PAY-08 [A], SET-02 [A], PST-02 | 4 | B, C, D, E |
+| `OperationStatus` | AUTH-04, SBP-03 [A], SET-02 [A], PST-02 | 4 | B, C, D, E |
 | `MPINInput` | AUTH-01, AUTH-06, SET-02; PST-01 [A] | 3–4 | A, B, E |
 | `ChoiceList` | AUTH-03, SET-04 | 2 | B, E |
-| `PaymentMethodSelector` | PAY-07; PAY-01 [A] | 1–2 | C, D |
+| `PaymentMethodSelector` | SBP-01; PAY-01 [A] | 1–2 | C, D |
 | `AccountCard` | ACC-01; HOME-01 [A] | 1–2 | G |
 | `TransactionList` | ACC-02, ACC-03 | 2 | G |
 | `TransactionRow` | Внутри `TransactionList` | 2 | G |
 | `StatusBadge` | Внутри `TransactionRow`, `BankCard`, `OperationStatus` | — | — |
 | `BankCard` | CARD-01 [A] | 1 | G |
-| `ServiceTile` | HOME-01 [A] | 1 | G |
+| `ServiceTile` | HOME-04 [A] | 1 | G |
 | `OTPVerification` | AUTH-07; SET-02 [A] | 1–2 | B, E |
 | `AuthMethodSelector` | AUTH-01 | 1 | A |
 | `QRScanner` | PAY-03 | 1 | C, D, H |
@@ -162,10 +162,10 @@
 | Компонент | Почему не часть экрана |
 |---|---|
 | `AuthMethodSelector` | Логика выбора способа входа не должна жить в экране. Может понадобиться и в PST-01 [A] |
-| `QRScanner` | Работа с камерой: доступ, ошибки, распознавание. Открывается и из UPI, и из нижней навигации |
+| `QRScanner` | Работа с камерой: доступ, ошибки, распознавание. Открывается и из СБП, и из нижней навигации |
 | `NotificationItem` | Сложная строка со статусом «прочитано». Возможен блок последних уведомлений на главной [A] |
 | `SearchResult` | Результат поиска разного типа. Появится, когда станет понятно, по чему ищем |
 | `BankCard` | Карта — отдельная доменная сущность. Возможно, будет и на главной [A] |
-| `ServiceTile` | Главная — хаб на 15 направлений, плитки нужны именно ей. Возможно, понадобятся и в HOME-04 Menu [A] |
+| `ServiceTile` | По [D-04] направления собраны в меню. Плитки — один из вариантов его вида, второй — `ListRow` [A] |
 
 Специфичных для экрана компонентов вроде `LoginButton` или `PaymentScreenHeader` в спецификации **нет**.

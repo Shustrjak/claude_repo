@@ -1,6 +1,7 @@
 # Композиция экранов (Уровень 3–4 — Screen Composition)
 
 Часть UI-спецификации Banking Shell. Это архитектура, а не реализация: дерево показывает, из каких компонентов собран экран.
+Принятые решения `[D-xx]` — в [журнале решений](UI_ARCHITECTURE.md#журнал-решений).
 
 **Обозначения:**
 
@@ -29,7 +30,7 @@ AppShell(auth)
 AUTH-02 Register User
 AppShell(auth)
 ├── AppHeader(back)
-├── UNKNOWN — поля регистрации   (ROADMAP R01: страна и телефон [R], см. Q-04)
+├── UNKNOWN — поля регистрации   (онбординг по R38 [D-02]; поля из R01 — Q-22)
 └── ActionButton(action="next")
 ```
 
@@ -53,7 +54,7 @@ AppShell(auth)
 AUTH-05 Personal & Card Details
 AppShell(auth)
 ├── AppHeader(back)
-├── UNKNOWN — личные данные       (Input × N, см. Q-04)
+├── UNKNOWN — личные данные       (Input × N, см. Q-22)
 ├── UNKNOWN — данные карты        (Input × N)
 └── ActionButton(action="next")
 ```
@@ -83,7 +84,8 @@ AppShell(main)
 ├── AppHeader(actions = поиск, уведомления, профиль)   [A]
 ├── AsyncContent
 │   ├── AccountCard                                    [A]
-│   └── ServiceTile × N   (направления главной)        [A], см. Q-09
+│   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10)
+├── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 └── BottomNavigation
 ```
 
@@ -109,7 +111,10 @@ AppShell(main)
 HOME-04 Menu
 AppShell(main)
 ├── AppHeader
-└── ListRow(link) × N             (пункты UNKNOWN, см. Q-09, Q-10)
+└── ListRow(link) или ServiceTile × 9   [D-04]; вид — [A]
+    ACC-01, PAY-01, PAY-02, CARD-01, SVC-01, SVC-02, SVC-03, SVC-04, SBP-01
+    (кандидаты SVC-01, SVC-02, SVC-04 — в состоянии «недоступно», Q-12)
+    (место под зарезервированные разделы CREDIT, CASHBACK, SAVE — D-05)
 ```
 
 ## ACC
@@ -144,7 +149,7 @@ AppShell(main)
 ACC-07 Open Account
 AppShell(auth)                    [A] — пользователь ещё не вошёл (ветка D1 = NO)
 ├── AppHeader(back)
-└── ListRow(link) × 4             (Savings, Current, Loan, Register UPI)
+└── ListRow(link) × 4             (Savings, Current, Loan, Подключение СБП)
 ```
 
 **ACC-04 Savings, ACC-05 Current, ACC-06 Loan Services** — кандидаты, композиция не проектируется до ответа на [Q-12](SCREEN_INVENTORY.md#q-12).
@@ -155,7 +160,7 @@ AppShell(auth)                    [A] — пользователь ещё не �
 PAY-01 Pay
 AppShell(main)
 ├── AppHeader
-└── PaymentMethodSelector         [A] — у Pay на схеме нет связей (Q-06)
+└── PaymentMethodSelector         [A] — у Pay на схеме нет связей (Q-11). Входы: меню и нижняя навигация [D-04]
 ```
 
 ```
@@ -187,32 +192,35 @@ AppShell(main)
 └── ActionButton(action="next")   → PST-01
 ```
 
-```
-PAY-05 Pay to UPI ID
-  то же, что PAY-04, но PaymentForm(recipientType=upiId)
-```
+**PAY-05 Pay to UPI ID** — кандидат: в СБП нет аналога UPI ID. Не проектируется до ответа на [Q-23](UI_ARCHITECTURE.md#открытые-вопросы).
 
 ```
 PAY-06 Pay to Bank Account
-  то же, что PAY-04, но PaymentForm(recipientType=bankAccount)
+  то же, что PAY-04, но PaymentForm(recipientType=bankAccount): номер счёта и БИК [D-01]
 ```
 
+## СБП (внутри домена PAY)
+
 ```
-PAY-07 UPI
+SBP-01 СБП                        (на схеме — UPI)
 AppShell(main)
 ├── AppHeader
-└── PaymentMethodSelector(methods = qr, mobile, upiId, bankAccount)
+└── PaymentMethodSelector(methods = qr, mobile, bankAccount)
 ```
 
 ```
-PAY-08 Register UPI
+SBP-03 Подключение СБП            (на схеме — Register UPI)
 AppShell(auth)                    [A] — находится в ветке Open Account
 ├── AppHeader(back)
-├── UNKNOWN — шаги регистрации UPI
+├── UNKNOWN — шаги подключения (Q-23)
 └── OperationStatus               [A]
 ```
 
-**PAY-09 UPI Functions** — кандидат, возможный дубль PAY-07. Не проектируется до ответа на [Q-06](SCREEN_INVENTORY.md#q-06).
+**SBP-02 Функции СБП** (на схеме — UPI Functions) — кандидат, группа навигации. С SBP-01 не объединяется [D-04]. Содержимое неизвестно ([Q-11](SCREEN_INVENTORY.md#q-11)).
+
+## Зарезервированные разделы
+
+**CREDIT, CASHBACK, SAVE** — место в меню оставлено, экраны проектируются отдельно [D-05].
 
 ## Предложенные состояния платежа
 
@@ -345,10 +353,10 @@ AppShell(main)
 | AUTH-05 | ● | | | | | | | | | | — |
 | AUTH-06 | ● | ● | | | | ● | | | | | — |
 | AUTH-07 | | | ● | | | | | | | | — |
-| HOME-01 | | | | | | | ● | | | | `AccountCard` ○, `ServiceTile` ○, `BottomNavigation` |
+| HOME-01 | | | | | | ○ | ● | | | | `AccountCard` ○, `TransactionList` ○, `BottomNavigation` |
 | HOME-02 | | | | | | | ● | ● | | | `SearchResult` |
 | HOME-03 | | | | | | | ● | | | | — |
-| HOME-04 | | | | | | ● | | | | | — |
+| HOME-04 | | | | | | ● | | | | | `ServiceTile` ○ |
 | ACC-01 | | | | | | ○ | ● | | | | `AccountCard` |
 | ACC-02 | | | | | | | ● | ● | | | `TransactionList` |
 | ACC-03 | | | | | | | ● | ● | | | `TransactionList` |
@@ -357,10 +365,9 @@ AppShell(main)
 | PAY-02 | | | | | | ○ | | | ○ | | — |
 | PAY-03 | | | | | | | | ○ | ○ | | `QRScanner` |
 | PAY-04 | ● | | | | | | | | ● | ○ | `RecipientInput` |
-| PAY-05 | ● | | | | | | | | ● | ○ | `RecipientInput` |
 | PAY-06 | ● | | | | | | | | ● | ○ | `RecipientInput` |
-| PAY-07 | | | | | | | | | | | `PaymentMethodSelector` |
-| PAY-08 | ● | | | | ○ | | | | | | — |
+| SBP-01 | | | | | | | | | | | `PaymentMethodSelector` |
+| SBP-03 | ● | | | | ○ | | | | | | — |
 | CARD-01 | | | | | | ○ | ● | | | | `BankCard` ○ |
 | SVC-03 | | | | | | | ● | ● | | | — |
 | NOTIF-01 | | | | | | | ● | ● | | | `NotificationItem` |
@@ -383,9 +390,9 @@ AppShell(main)
 | N29 — второй Card Services | Дубль экрана | Ссылается на CARD-01, отдельной реализации нет | Принято как дубль до ответа на Q-15 |
 | N35 Pay, N36 Scan QR в нижней навигации | Пункты навигации | Ведут на PAY-01 и PAY-03 | Из схемы |
 | N34 Go to Home | Пункт навигации | Ведёт на HOME-01 | Из схемы |
-| PAY-09 UPI Functions и PAY-07 UPI | Возможный дубль | Не объединять до ответа на Q-06 | CANDIDATE |
-| PAY-01 Pay и PAY-07 UPI | Возможный дубль или вариант | Оба показывают `PaymentMethodSelector`. Могут оказаться одним экраном | Q-06 |
-| PAY-04, PAY-05, PAY-06 | **Варианты одного экрана** | Одна композиция, разный `recipientType`. Реализация одна | Архитектурное решение: экраны остаются в инвентаре, реализация общая |
+| SBP-02 Функции СБП и SBP-01 СБП | Разные узлы | Не объединять: SBP-02 стоит рядом с Settings | Решено [D-04] |
+| PAY-01 Pay в меню и в нижней навигации | Один экран, два входа | Реализация одна | Решено [D-04] |
+| PAY-04, PAY-06 (и PAY-05, если останется) | **Варианты одного экрана** | Одна композиция, разный `recipientType`. Реализация одна | Архитектурное решение: экраны остаются в инвентаре, реализация общая |
 | ACC-02 и ACC-03 | Варианты | Один `TransactionList`, варианты `compact` и `full` | Q-10 |
 | ACC-02 Mini Statement | Возможно, блок на главной | Может оказаться частью HOME-01, а не экраном | Q-10 |
 | AUTH-04 Bind SIM | Возможно, состояние AUTH-03 | `OperationStatus` после выбора SIM | Q-10 |

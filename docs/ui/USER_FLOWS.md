@@ -1,12 +1,13 @@
 # Пользовательские флоу (Уровень 2 — User Flows)
 
 Часть UI-спецификации Banking Shell. ID экранов — из [SCREEN_INVENTORY.md](SCREEN_INVENTORY.md). Источник — [`refs/R38-user-flow.jpg`](../../refs/R38-user-flow.jpg).
+Принятые решения `[D-xx]` — в [журнале решений](UI_ARCHITECTURE.md#журнал-решений). По [D-01] UPI со схемы заменён на СБП.
 
 **Как читать схемы:**
 
 | Обозначение | Значение |
 |---|---|
-| Сплошная стрелка | Переход есть на схеме-источнике `[S]` |
+| Сплошная стрелка | Переход есть на схеме-источнике `[S]` или следует из принятого решения `[D-xx]` |
 | Пунктирная стрелка | Переход предложен `[A]` или взят из ROADMAP `[R]` |
 | Ромб | Решение |
 | Пунктирная рамка | Предложенное состояние флоу (`PST-xx`). В инвентарь экранов не входит |
@@ -62,68 +63,72 @@ flowchart TD
 
 - **Из схемы:** весь путь целиком, включая Success → главная и Failure → AUTH-03 Select SIM.
 - **Вопрос:** порядок шагов. OTP стоит после установки MPIN, а при ошибке пользователь возвращается к выбору SIM, см. [Q-07](SCREEN_INVENTORY.md#q-07).
-- **Вопрос:** расхождение с ROADMAP. В этапе 1 роадмапа регистрация устроена по Revolut (R01): страна, телефон, адрес, почта, дата рождения, пароль. Какой вариант главный — [Q-04](SCREEN_INVENTORY.md#q-04).
+- **Решено [D-02]:** главный онбординг — этот, из R38. Какие поля регистрации по Revolut (R01) из ROADMAP войдут в AUTH-02 и AUTH-05 — [Q-22](UI_ARCHITECTURE.md#открытые-вопросы).
+- **Решено [D-03]:** выбор и привязка SIM в браузере имитируются.
 - **Вопрос:** что происходит при ошибке привязки SIM (AUTH-04). На схеме этого нет.
 
 ## C. Платёж
 
-На схеме у PAY-01 Pay **нет исходящих связей**. Поэтому флоу ниже собран так: способы оплаты взяты из ветки UPI (флоу D), а подтверждение и результат — предложенные состояния.
+По [D-04] Pay — одна точка входа в платежи с двумя входами: из нижней навигации и из меню. На схеме у PAY-01 Pay **нет исходящих связей**. Поэтому флоу ниже собран так: способы оплаты взяты из раздела СБП (флоу D), а подтверждение и результат — предложенные состояния.
 
 ```mermaid
 flowchart LR
-  HOME01[HOME-01 Home] --> PAY01[PAY-01 Pay]
+  MENU[HOME-04 Menu] --> PAY01[PAY-01 Pay]
   NAV[[BottomNavigation: Pay]] --> PAY01
   PAY01 -.-> METHOD{способ оплаты}
   METHOD -.-> PAY03[PAY-03 Scan QR]
   METHOD -.-> PAY04[PAY-04 Pay to Mobile]
-  METHOD -.-> PAY05[PAY-05 Pay to UPI ID]
   METHOD -.-> PAY06[PAY-06 Pay to Bank a/c]
   PAY03 -.-> FORM[форма: получатель подставлен из QR]
   PAY04 -.-> CONF[PST-01 Подтверждение]
-  PAY05 -.-> CONF
   PAY06 -.-> CONF
   FORM -.-> CONF
   CONF -.-> RES[PST-02 Результат]
-  RES -.-> HOME01
+  RES -.-> HOME01[HOME-01 Home]
   classDef proposed stroke-dasharray: 5 5
   class CONF,RES,FORM,METHOD proposed
 ```
 
 | Шаг | Где происходит | Источник |
 |---|---|---|
-| Home → Pay | HOME-01 → PAY-01 | [S] |
-| Выбор способа оплаты | PAY-01 | [A]: у Pay на схеме нет связей. Список способов взят из ветки UPI |
-| Получатель и сумма | PAY-04, PAY-05, PAY-06 — одна форма `PaymentForm` | Экраны [S], состав формы [A] |
+| Меню или нижняя навигация → Pay | HOME-04 → PAY-01; BottomNavigation → PAY-01 | [S], [D-04] |
+| Выбор способа оплаты | PAY-01 | [A]: у Pay на схеме нет связей. Список способов взят из раздела СБП |
+| Получатель и сумма | PAY-04, PAY-06 — одна форма `PaymentForm` | Экраны [S], состав формы [A] |
 | Подтверждение | PST-01 | [A] |
 | Результат | PST-02 | [A] |
 | Возврат на главную | PST-02 → HOME-01 | [A] |
 
+PAY-05 (UPI ID) в этот флоу не включён: это кандидат без аналога в СБП, см. [Q-23](UI_ARCHITECTURE.md#открытые-вопросы).
+
 **Оплата услуг (PAY-02)** на схеме тоже заканчивается тупиком. Предложено вести её через ту же форму и PST-01 → PST-02 [A]. Содержимое раздела — [Q-11](SCREEN_INVENTORY.md#q-11).
 
-## D. UPI
+## D. СБП
+
+На схеме это ветка UPI. По [D-01] — СБП, по [D-04] — раздел внутри домена платежей, а не отдельный бизнес-домен.
 
 ```mermaid
 flowchart LR
-  HOME01[HOME-01 Home] --> PAY07[PAY-07 UPI]
-  PAY07 --> PAY03[PAY-03 Scan QR]
-  PAY07 --> PAY04[PAY-04 Pay to Mobile]
-  PAY07 --> PAY05[PAY-05 Pay to UPI ID]
-  PAY07 --> PAY06[PAY-06 Pay to Bank a/c]
-  NAV[[BottomNavigation]] --> PAY09[PAY-09 UPI Functions]
+  MENU[HOME-04 Menu] --> SBP01[SBP-01 СБП]
+  SBP01 --> PAY03[PAY-03 Scan QR]
+  SBP01 --> PAY04[PAY-04 Pay to Mobile]
+  SBP01 --> PAY05[PAY-05 Pay to UPI ID]
+  SBP01 --> PAY06[PAY-06 Pay to Bank a/c]
+  NAV[[BottomNavigation]] --> SBP02[SBP-02 Функции СБП]
   NAV --> PAY03
-  PAY09 -. "дубль PAY-07?" .- PAY07
-  ACC07[ACC-07 Open Account] --> PAY08[PAY-08 Register UPI]
+  ACC07[ACC-07 Open Account] --> SBP03[SBP-03 Подключение СБП]
   classDef candidate fill:#eee,stroke:#999
-  class PAY09 candidate
+  class SBP02,PAY05 candidate
 ```
 
 - **Из схемы:**
-  - UPI → четыре способа оплаты;
-  - Scan QR доступен и из UPI, и из нижней навигации;
-  - Register UPI находится в ветке открытия счёта.
-- **Вопросы:**
-  - связь PAY-01, PAY-07 и PAY-09 — [Q-06](SCREEN_INVENTORY.md#q-06);
-  - заменять ли UPI на СБП или SPEI — [Q-14](SCREEN_INVENTORY.md#q-14).
+  - СБП (на схеме UPI) → четыре способа перевода;
+  - Scan QR доступен и из СБП, и из нижней навигации;
+  - подключение СБП (на схеме Register UPI) находится в ветке открытия счёта.
+- **Решено [D-04]:** SBP-02 Функции СБП стоит рядом с Settings и с SBP-01 **не объединяется**. Это кандидат и, скорее всего, группа пунктов навигации.
+- **Вопрос [Q-23](UI_ARCHITECTURE.md#открытые-вопросы):**
+  - у UPI ID (PAY-05) нет аналога в СБП;
+  - перевод по реквизитам (PAY-06) в России идёт не через СБП;
+  - что означает «подключение СБП» (SBP-03).
 
 ## E. Настройки
 
@@ -148,7 +153,7 @@ flowchart TD
   ACC07 --> ACC04[ACC-04 Savings Account]
   ACC07 --> ACC05[ACC-05 Current Account]
   ACC07 --> ACC06[ACC-06 Loan Services]
-  ACC07 --> PAY08[PAY-08 Register UPI]
+  ACC07 --> SBP03[SBP-03 Подключение СБП]
   classDef candidate fill:#eee,stroke:#999
   class ACC04,ACC05,ACC06 candidate
 ```
@@ -156,31 +161,36 @@ flowchart TD
 - **Из схемы:** все пять узлов и связи между ними.
 - **Тупик:** из ветки нет пути ни в регистрацию, ни на главную — [Q-02](SCREEN_INVENTORY.md#q-02).
 
-## G. Главная как хаб
+## G. Главная и меню
+
+По [D-04] схема читается так: верхние ветки — главная, а ветки от Account Information и ниже — содержимое меню.
 
 ```mermaid
 flowchart LR
   HOME01[HOME-01 Home] --> HOME02[HOME-02 Search]
   HOME01 --> HOME03[HOME-03 Profile]
-  HOME01 --> HOME04[HOME-04 Menu]
-  HOME01 --> NOTIF01[NOTIF-01 Notifications]
-  HOME01 --> ACC01[ACC-01 Account Info]
   HOME01 --> ACC02[ACC-02 Mini Statement]
   HOME01 --> ACC03[ACC-03 Detailed Statement]
-  HOME01 --> PAY01[PAY-01 Pay]
-  HOME01 --> PAY02[PAY-02 Bill Payments]
-  HOME01 --> PAY07[PAY-07 UPI]
-  HOME01 --> CARD01[CARD-01 Card Services]
-  HOME01 --> SVC01[SVC-01 Deposits & OD]
-  HOME01 --> SVC02[SVC-02 Trading]
-  HOME01 --> SVC03[SVC-03 Locate Branch]
-  HOME01 --> SVC04[SVC-04 Other Services]
+  HOME01 --> NOTIF01[NOTIF-01 Notifications]
+  HOME01 --> HOME04[HOME-04 Menu]
+  HOME04 --> ACC01[ACC-01 Account Info]
+  HOME04 --> PAY01[PAY-01 Pay]
+  HOME04 --> PAY02[PAY-02 Bill Payments]
+  HOME04 --> CARD01[CARD-01 Card Services]
+  HOME04 --> SVC01[SVC-01 Deposits & OD]
+  HOME04 --> SVC02[SVC-02 Trading]
+  HOME04 --> SVC03[SVC-03 Locate Branch]
+  HOME04 --> SVC04[SVC-04 Other Services]
+  HOME04 --> SBP01[SBP-01 СБП]
   classDef candidate fill:#eee,stroke:#999
   class SVC01,SVC02,SVC04 candidate
 ```
 
-- **Из схемы:** с главной ведут 15 уникальных направлений. Card Services нарисован дважды, это один экран.
-- **Не описано:** какие направления показываются на самой главной, а какие уходят в меню — [Q-09](SCREEN_INVENTORY.md#q-09).
+- **Главная [D-04]:** поиск, профиль, мини-выписка, подробная выписка, уведомления, меню и нижняя навигация.
+- **Меню [D-04]:** 9 уникальных направлений. Card Services на схеме нарисован дважды, это один экран.
+- **Notifications** оставлены на главной: в меню по [D-04] входят ветки начиная с Account Information, а уведомления на схеме выше.
+- **Зарезервировано [D-05]:** кредитная карта, кешбэк и накопления. Скорее всего, появятся в меню, проектируются отдельно.
+- **Не описано:** на главной мини-выписка — это блок или ссылка на экран, см. [Q-10](SCREEN_INVENTORY.md#q-10).
 
 ## H. Нижняя навигация
 
@@ -192,20 +202,21 @@ flowchart LR
 | Pay | PAY-01 | [S] |
 | Scan QR | PAY-03 | [S] |
 | Settings | SET-01 | [S] |
-| UPI Functions | PAY-09 (кандидат) | [S] |
+| UPI Functions → Функции СБП | SBP-02 (кандидат, группа навигации) | [S], [D-01], [D-04] |
 
 - **Не описано:** на каких экранах показывается нижняя навигация. Предложено: на экранах после входа [A].
 - **Не описано:** связан ли HOME-04 Menu с SET-01. На схеме настройки открываются только из нижней навигации.
+- **Pay в нижней навигации и Pay в меню** — один экран PAY-01 [D-04].
 
 ---
 
 ## Сводка: какие переходы откуда
 
-| Флоу | Переходы из схемы [S] | Предложенные [A] | Тупики и неясности |
+| Флоу | Переходы из схемы [S] и решений [D] | Предложенные [A] | Тупики и неясности |
 |---|---|---|---|
 | A. Вход | Start → D1 → D2 → AUTH-01 → HOME-01 | PST-03 ошибка входа | Как принимаются решения D1 и D2 |
-| B. Регистрация | AUTH-02 → … → AUTH-07 → HOME-01; Failure → AUTH-03 | — | Порядок OTP и MPIN; ошибка на AUTH-04 |
-| C. Платёж | HOME-01 → PAY-01 | Способ оплаты, PST-01, PST-02 | У PAY-01 нет исходящих связей |
-| D. UPI | PAY-07 → PAY-03…06 | PAY-03…06 → PST-01 → PST-02 | PAY-09 — дубль или нет |
+| B. Регистрация | AUTH-02 → … → AUTH-07 → HOME-01; Failure → AUTH-03 | — | Порядок OTP и MPIN; ошибка на AUTH-04; поля из R01 (Q-22) |
+| C. Платёж | Меню и нижняя навигация → PAY-01 [D-04] | Способ оплаты, PST-01, PST-02 | У PAY-01 нет исходящих связей |
+| D. СБП | SBP-01 → PAY-03…06 | PAY-03…06 → PST-01 → PST-02 | Аналоги UPI в СБП (Q-23) |
 | E. Настройки | SET-01 → SET-02…04, Logout | Logout → AUTH-01 | Подтверждение выхода |
-| F. Открытие счёта | D1 → ACC-07 → ACC-04…06, PAY-08 | — | Нет выхода из ветки |
+| F. Открытие счёта | D1 → ACC-07 → ACC-04…06, SBP-03 | — | Нет выхода из ветки |
