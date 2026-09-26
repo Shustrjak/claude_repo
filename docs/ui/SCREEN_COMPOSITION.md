@@ -12,19 +12,26 @@
 | `[R]` | Из ROADMAP, на схеме нет |
 | `[D-xx]` | Принятое решение |
 | `UNKNOWN` | Схема не описывает содержимое |
+| `SOURCE_REQUIRED` | Содержимое экрана не проектируется, пока нет источника (Q-11, [D-07]) |
 
 Каждый экран собран в `AppShell`. У экранов до входа вариант `auth` (без нижней навигации), после входа — `main`: он уже содержит `BottomNavigation`, поэтому в деревьях она отдельно не показывается [A]. На каких экранах нижняя навигация видна на самом деле — UNKNOWN.
+
+До входа доступны AUTH-01, ACC-07 и AUTH-02…07 [D-08].
+
+**Композиций нет** у кандидата SBP-02 и у отключённых пунктов навигации ACC-04…06, SVC-01, SVC-02, SVC-04 [D-11].
 
 ---
 
 ## AUTH
 
 ```
-AUTH-01 Login
+AUTH-01 Login                      (стартовый экран [D-08])
 AppShell(auth)
 ├── AppHeader
 ├── AuthMethodSelector            (биометрия или MPIN)
-│   └── MPINInput(mode=enter)     (когда выбран MPIN)
+│   └── MPINInput(mode=enter)     (4 цифры [D-09]; когда выбран MPIN)
+├── ListRow(link) «Открыть счёт» → ACC-07      [D-08]; вид ссылки — [A]
+│   (переход в регистрацию для клиента банка — UNKNOWN, Q-24)
 └── StatusMessage(error)          (PST-03 — ошибка входа) [A]
 ```
 
@@ -32,20 +39,20 @@ AppShell(auth)
 AUTH-02 Register User
 AppShell(auth)
 ├── AppHeader(back)
-├── UNKNOWN — поля регистрации   (онбординг по R38 [D-02]; поля из R01 — Q-22)
+├── PhoneInput(+7)                [D-15]
 └── ActionButton(action="next")
 ```
 
 ```
-AUTH-03 Select SIM
+AUTH-03 Select SIM                 (данные — граница устройства [D-14])
 AppShell(auth)
 ├── AppHeader(back)
-├── ChoiceList(items = SIM-слоты)
+├── ChoiceList(items = SIM-слоты) (демо-реализация [D-03])
 └── ActionButton(action="next")
 ```
 
 ```
-AUTH-04 Bind SIM
+AUTH-04 Bind SIM                   (граница устройства [D-14])
 AppShell(auth)
 ├── AppHeader
 ├── OperationStatus(pending → success | failure)   [A]
@@ -53,11 +60,16 @@ AppShell(auth)
 ```
 
 ```
-AUTH-05 Personal & Card Details
+AUTH-05 Personal & Card Details    (состав полей — [D-15])
 AppShell(auth)
 ├── AppHeader(back)
-├── UNKNOWN — личные данные       (Input × N, см. Q-22)
-├── UNKNOWN — данные карты        (Input × N)
+├── Input × 2                     имя, фамилия
+├── Input(маска даты)             дата рождения (18+)
+├── Input × 7                     адрес: индекс, регион, город, район, улица, дом, квартира
+├── Input                         почта
+├── UNKNOWN — подтверждение почты (способ — Q-27)
+├── Checkbox                      согласие на push-уведомления и рассылки (одно или два — Q-27)
+├── Input × 2                     номер карты, срок действия карты
 └── ActionButton(action="next")
 ```
 
@@ -65,14 +77,14 @@ AppShell(auth)
 AUTH-06 Set MPIN & Enable Biometric
 AppShell(auth)
 ├── AppHeader(back)
-├── MPINInput(mode=create)
+├── MPINInput(mode=create)        4 цифры [D-09]
 ├── MPINInput(mode=confirm)       [R] «пароль + повтор»
-├── ListRow(variant=toggle)       (включить биометрию)
+├── ListRow(variant=toggle)       включить биометрию; доступность — граница устройства [D-14]
 └── ActionButton(action="next")
 ```
 
 ```
-AUTH-07 OTP Authentication
+AUTH-07 OTP Authentication         (OTP для онбординга [D-10])
 AppShell(auth)
 ├── AppHeader
 └── OTPVerification               (Success → HOME-01, Failure → AUTH-03)
@@ -94,27 +106,23 @@ AppShell(main)
 HOME-02 Search
 AppShell(main)
 ├── AppHeader(back)
-├── Input(search)
-└── AsyncContent
-    ├── SearchResult × N          (UNKNOWN, см. Q-11)
-    └── StatusMessage(empty)
+└── SOURCE_REQUIRED — содержимое (Q-11)
 ```
 
 ```
 HOME-03 Profile
 AppShell(main)
 ├── AppHeader(back)
-└── AsyncContent
-    └── UNKNOWN — содержимое профиля (Q-11)
+└── SOURCE_REQUIRED — содержимое (Q-11)
 ```
 
 ```
 HOME-04 Menu
 AppShell(main)
 ├── AppHeader
-└── ListRow(link) или ServiceTile × 9   [D-04]; вид — [A]
-    ACC-01, PAY-01, PAY-02, CARD-01, SVC-01, SVC-02, SVC-03, SVC-04, SBP-01
-    (кандидаты SVC-01, SVC-02, SVC-04 — в состоянии «недоступно», Q-12)
+└── ListRow(link) или ServiceTile          [D-04]; вид — [A]
+    активные:    ACC-01, PAY-01, PAY-02, CARD-01, SVC-03, SBP-01
+    отключённые: SVC-01, SVC-02, SVC-04 — неактивные пункты, без экрана [D-11]
 ```
 
 ## ACC
@@ -123,9 +131,7 @@ AppShell(main)
 ACC-01 Account Information
 AppShell(main)
 ├── AppHeader(back)
-└── AsyncContent
-    ├── AccountCard(variant=подробный)
-    └── ListRow(variant=value, copyable) × N    [A][R]  (реквизиты)
+└── SOURCE_REQUIRED — содержимое (Q-11)
 ```
 
 ```
@@ -140,44 +146,41 @@ AppShell(main)
 ACC-03 Detailed Statement
 AppShell(main)
 ├── AppHeader(back)
-├── UNKNOWN — фильтр периода      (Q-11)
-└── AsyncContent
-    └── TransactionList(variant=full)      [S — «Detailed Statement»]
+└── SOURCE_REQUIRED — содержимое, в том числе есть ли фильтр периода (Q-11)
 ```
 
 ```
-ACC-07 Open Account
-AppShell(auth)                    [A] — пользователь ещё не вошёл (ветка D1 = NO)
+ACC-07 Open Account                (вход — ссылка с AUTH-01 [D-08])
+AppShell(auth)
 ├── AppHeader(back)
-└── ListRow(link) × 4             (Savings, Current, Loan, Подключение СБП)
+├── ListRow(link, disabled) × 3    Savings, Current, Loan — отключённые пункты [D-11]
+└── ActionButton(action="next") → AUTH-02    [D-08]; кнопка как способ перехода — [A]
+    (какой счёт открывается, если все три типа отключены, — Q-26)
 ```
-
-**ACC-04 Savings, ACC-05 Current, ACC-06 Loan Services** — кандидаты, композиция не проектируется до ответа на [Q-12](SCREEN_INVENTORY.md#q-12).
 
 ## PAY
 
 ```
-PAY-01 Pay
+PAY-01 Pay                         (входы: меню и нижняя навигация [D-04])
 AppShell(main)
 ├── AppHeader
-└── PaymentMethodSelector         [A] — у Pay на схеме нет связей (Q-11). Входы: меню и нижняя навигация [D-04]
+└── SOURCE_REQUIRED — содержимое и переходы (Q-11)
 ```
 
 ```
 PAY-02 Bill Payments
 AppShell(main)
 ├── AppHeader(back)
-├── ListRow(link) × N             (поставщики услуг) [A][R]
-└── → PaymentForm → PST-01 → PST-02                  [A]
+└── SOURCE_REQUIRED — содержимое и переходы (Q-11)
 ```
 
 ```
-PAY-03 Scan QR
+PAY-03 Scan QR                     (камера — граница устройства [D-14])
 AppShell(main)
 ├── AppHeader(back)
 ├── QRScanner
 └── StatusMessage(error)          (камера запрещена) [A]
-    → после распознавания: PaymentForm(initialRecipient из QR) [A]
+    → после распознавания: PaymentForm(initialRecipient из QR) → PST-01 [A]
 ```
 
 ```
@@ -210,34 +213,38 @@ AppShell(main)
 ```
 
 ```
-SBP-03 Подключение СБП            (на схеме — Register UPI)
-AppShell(auth)                    [A] — находится в ветке Open Account
+SBP-03 Подключение СБП            (на схеме — Register UPI; после входа [D-08])
+AppShell(main)
 ├── AppHeader(back)
 ├── ListRow(toggle)               «Банк по умолчанию для входящих переводов СБП» [D-06]; вид — [A]
 ├── ActionButton(action="confirm")  [A]
 └── OperationStatus               [A]
+    (откуда открывается — SBP-01 или SBP-02, — Q-25)
 ```
 
-**SBP-02 Функции СБП** (на схеме — UPI Functions) — кандидат, группа навигации. С SBP-01 не объединяется [D-04]. Содержимое неизвестно ([Q-11](SCREEN_INVENTORY.md#q-11)).
+**SBP-02 Функции СБП** (на схеме — UPI Functions) — кандидат, группа навигации. С SBP-01 не объединяется [D-04]. Содержимое — SOURCE_REQUIRED ([Q-11](SCREEN_INVENTORY.md#q-11)).
 
 ## Зарезервированные разделы
 
 **CREDIT, CASHBACK, SAVE** — префиксы зарезервированы, экраны и их место в навигации проектируются отдельно [D-05].
 
-## Предложенные состояния платежа
+## Состояния платежа
+
+По [D-13] подтверждение и результат платежа — обязательные состояния флоу. Отдельных ID экранов они не получают.
 
 ```
-PST-01 Подтверждение платежа       [A]
-BottomSheet или отдельный экран
+PST-01 Подтверждение платежа       [D-13]; шторка или экран — [A]
 └── PaymentConfirmation
     ├── PaymentSummary
-    ├── MPINInput(mode=enter)      UNKNOWN (Q-18)
+    ├── AuthMethodSelector        биометрия ИЛИ MPIN, не оба сразу [D-13]
+    │   └── MPINInput(mode=enter) 4 цифры [D-09]; запасной способ или единственный,
+    │                             если биометрия недоступна или выключена
     ├── ActionButton(action="pay")
     └── ActionButton(action="cancel")
 ```
 
 ```
-PST-02 Результат платежа           [A]
+PST-02 Результат платежа           [D-13]
 AppShell(main)
 ├── OperationStatus(success | failure | pending)
 ├── PaymentSummary
@@ -257,7 +264,7 @@ AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
     ├── BankCard × N               [A]
-    └── ListRow(link) × N          (действия с картой UNKNOWN; ROADMAP, этап 3 [R])
+    └── ListRow(link) × N          (действия с картой UNKNOWN; ROADMAP, этап 3 [R]; см. Q-28)
 ```
 
 ## SVC
@@ -266,11 +273,10 @@ AppShell(main)
 SVC-03 Locate Branch
 AppShell(main)
 ├── AppHeader(back)
-└── AsyncContent
-    └── UNKNOWN — список или карта отделений (Q-11)
+└── SOURCE_REQUIRED — содержимое (Q-11)
 ```
 
-**SVC-01 Deposits & OD, SVC-02 Trading, SVC-04 Other Services** — кандидаты, композиция не проектируется ([Q-12](SCREEN_INVENTORY.md#q-12)).
+**SVC-01 Deposits & OD, SVC-02 Trading, SVC-04 Other Services** — отключённые пункты меню без экрана [D-11].
 
 ## NOTIF
 
@@ -278,9 +284,7 @@ AppShell(main)
 NOTIF-01 Notifications
 AppShell(main)
 ├── AppHeader(back)
-└── AsyncContent
-    ├── NotificationItem × N          [S — «Notifications»]; поля — Q-11
-    └── StatusMessage(empty)
+└── SOURCE_REQUIRED — содержимое (Q-11)
 ```
 
 ## SET
@@ -292,23 +296,22 @@ AppShell(main)
 ├── ListRow(link)    → SET-02 Change MPIN
 ├── ListRow(link)    → SET-03 Biometric Login
 ├── ListRow(link)    → SET-04 Change Language
-└── ListRow(danger)  → действие Logout (N42)
+└── ListRow(danger)  → действие Logout (N42) → AUTH-01 [D-08]
 ```
 
 ```
-SET-02 Change MPIN
+SET-02 Change MPIN                 (шаги внутри одного экрана [D-10])
 AppShell(main)
 ├── AppHeader(back)
-├── MPINInput(mode=current)        [A]
-├── MPINInput(mode=create)
-├── MPINInput(mode=confirm)        [A]
-├── OTPVerification                UNKNOWN (Q-07)
-├── ActionButton(action="confirm")
-└── OperationStatus                [A]
+├── шаг 1: OTPVerification         OTP для чувствительной операции [D-10]
+├── шаг 2: MPINInput(mode=create)  новый MPIN, 4 цифры [D-09]
+│          MPINInput(mode=confirm) повтор — как в AUTH-06 [A]
+│          ActionButton(action="confirm") [A]
+└── шаг 3: OperationStatus(success) [D-10]
 ```
 
 ```
-SET-03 Enable / Disable Biometric Login
+SET-03 Enable / Disable Biometric Login   (доступность — граница устройства [D-14])
 AppShell(main)
 ├── AppHeader(back)
 ├── ListRow(variant=toggle)
@@ -341,42 +344,42 @@ AppShell(main)
 | SM | `StatusMessage` |
 | PF | `PaymentForm` |
 | PS | `PaymentSummary` |
-| Другие | Компоненты, которые используются на одном-двух экранах |
+| Другие | Остальные компоненты |
 
-`AppShell` и `AppHeader` есть везде, в таблицу не включены.
+`AppShell` и `AppHeader` есть везде, в таблицу не включены. У экранов с `SOURCE_REQUIRED` (Q-11) компонентов нет: их содержимое не проектируется.
 
 | Экран | AB | MP | OTP | CL | OS | LR | AC | SM | PF | PS | Другие |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| AUTH-01 | | ● | | | | | | ○ | | | `AuthMethodSelector` |
-| AUTH-02 | ● | | | | | | | | | | — |
+| AUTH-01 | | ● | | | | ● | | ○ | | | `AuthMethodSelector` |
+| AUTH-02 | ● | | | | | | | | | | `PhoneInput` |
 | AUTH-03 | ● | | | ● | | | | | | | — |
 | AUTH-04 | ● | | | | ○ | | | | | | — |
-| AUTH-05 | ● | | | | | | | | | | — |
+| AUTH-05 | ● | | | | | | | | | | `Input`, `Checkbox` |
 | AUTH-06 | ● | ● | | | | ● | | | | | — |
 | AUTH-07 | | | ● | | | | | | | | — |
 | HOME-01 | | | | | | ○ | ● | | | | `AccountCard` ○, `TransactionList` ○ |
-| HOME-02 | | | | | | | ● | ● | | | `SearchResult` |
-| HOME-03 | | | | | | | ● | | | | — |
+| HOME-02 | | | | | | | | | | | SOURCE_REQUIRED |
+| HOME-03 | | | | | | | | | | | SOURCE_REQUIRED |
 | HOME-04 | | | | | | ● | | | | | `ServiceTile` ○ |
-| ACC-01 | | | | | | ○ | ● | | | | `AccountCard` |
+| ACC-01 | | | | | | | | | | | SOURCE_REQUIRED |
 | ACC-02 | | | | | | | ● | ● | | | `TransactionList` |
-| ACC-03 | | | | | | | ● | ● | | | `TransactionList` |
-| ACC-07 | | | | | | ● | | | | | — |
-| PAY-01 | | | | | | | | | | | `PaymentMethodSelector` ○ |
-| PAY-02 | | | | | | ○ | | | ○ | | — |
+| ACC-03 | | | | | | | | | | | SOURCE_REQUIRED |
+| ACC-07 | ○ | | | | | ● | | | | | — |
+| PAY-01 | | | | | | | | | | | SOURCE_REQUIRED |
+| PAY-02 | | | | | | | | | | | SOURCE_REQUIRED |
 | PAY-03 | | | | | | | | ○ | ○ | | `QRScanner` |
 | PAY-04 | ● | | | | | | | | ● | ○ | `RecipientInput` |
 | PAY-06 | ● | | | | | | | | ● | ○ | `RecipientInput` |
 | SBP-01 | | | | | | | | | | | `PaymentMethodSelector` |
-| SBP-03 | ● | | | | ○ | ○ | | | | | — |
+| SBP-03 | ○ | | | | ○ | ○ | | | | | — |
 | CARD-01 | | | | | | ○ | ● | | | | `BankCard` ○ |
-| SVC-03 | | | | | | | ● | ● | | | — |
-| NOTIF-01 | | | | | | | ● | ● | | | `NotificationItem` |
+| SVC-03 | | | | | | | | | | | SOURCE_REQUIRED |
+| NOTIF-01 | | | | | | | | | | | SOURCE_REQUIRED |
 | SET-01 | | | | | | ● | | | | | — |
-| SET-02 | ● | ● | ○ | | ○ | | | | | | — |
+| SET-02 | ○ | ● | ● | | ● | | | | | | — |
 | SET-03 | | | | | | ● | | ○ | | | — |
 | SET-04 | | | | ● | | | | | | | — |
-| PST-01 | ● | ○ | | | | | | | | ● | `PaymentConfirmation` |
+| PST-01 | ● | ● | | | | | | | | ● | `PaymentConfirmation`, `AuthMethodSelector` |
 | PST-02 | ● | | | | ● | | | | | ● | — |
 | PST-03 | ● | | | | | | | ● | | | — |
 
@@ -394,11 +397,11 @@ AppShell(main)
 | SBP-02 Функции СБП и SBP-01 СБП | Разные узлы | Не объединять: SBP-02 стоит рядом с Settings | Решено [D-04] |
 | PAY-01 Pay в меню и в нижней навигации | Один экран, два входа | Реализация одна | Решено [D-04] |
 | PAY-04, PAY-06 | **Варианты одного экрана** | Одна композиция, разный `recipientType`. Реализация одна | Архитектурное решение: экраны остаются в инвентаре, реализация общая |
-| ACC-02 и ACC-03 | Варианты | Один `TransactionList`, варианты `compact` и `full` | Q-10 |
+| OTP в AUTH-07 и в SET-02 | Один компонент | `OTPVerification` — шаг внутри SET-02, отдельного ID нет | Решено [D-10] |
+| ACC-02 и ACC-03 | Варианты | Один `TransactionList`, варианты `compact` и `full` | Q-10; содержимое ACC-03 — Q-11 |
 | ACC-02 Mini Statement | Возможно, блок на главной | Может оказаться частью HOME-01, а не экраном | Q-10 |
 | AUTH-04 Bind SIM | Возможно, состояние AUTH-03 | `OperationStatus` после выбора SIM | Q-10 |
 | SET-03 Biometric | Возможно, переключатель | `ListRow(toggle)` прямо в SET-01 | Q-10 |
 | HOME-04 Menu | Возможно, выдвижная панель | Шторка или боковая панель вместо экрана | Q-10 |
-| ACC-04, ACC-05, ACC-06 | Возможно, пункты меню | Это могут быть варианты выбора внутри ACC-07, а не экраны | Q-12 |
-| SVC-01, SVC-02, SVC-04 | Возможно, пункты меню | Для Banking Shell без банковского ядра это могут быть заглушки `StatusMessage(unavailable)` | Q-12 |
+| ACC-04…06, SVC-01, SVC-02, SVC-04 | Пункты меню | Отключённые пункты навигации без экрана | Решено [D-11] |
 | PST-03 | Состояние экрана | Состояние AUTH-01, не экран | [A] |
