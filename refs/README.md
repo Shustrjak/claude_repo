@@ -81,7 +81,7 @@
 | R30 | [Альфа-Банк core-components на GitHub](https://github.com/alfa-laboratory/core-components) | Открытая UI-библиотека Альфы (React, Storybook), настоящие компоненты банка | ✅ | Основа каркаса. Документация: [Storybook, «Начало работы»](https://alfa-laboratory.github.io/core-components/master/?path=/docs/%D0%B3%D0%B0%D0%B9%D0%B4%D0%BB%D0%B0%D0%B9%D0%BD%D1%8B-%D0%BD%D0%B0%D1%87%D0%B0%D0%BB%D0%BE-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B--page). Репозиторий переехал в [core-ds/core-components](https://github.com/core-ds/core-components). npm: `@alfalab/core-components`, React 16–19 |
 | R31 | [Альфа-Банк, дизайн-система Feather](https://adele.uxpin.com/alfa-bank-feather) | Описание дизайн-системы Альфы | ❌ | Мёртвая ссылка |
 | R32 | [Alfa Bank, файл в Figma Community](https://www.figma.com/community/file/779265086574105939/alfa-bank) | Экраны приложения Альфы в Figma | 🔍 | На рассмотрении |
-| R33 | [Taiga UI (Т-Банк)](https://taiga-ui.dev/), [Taiga 3.0 в Figma](https://www.figma.com/community/file/1220308188005380608/taiga-3-0) | Открытый UI-кит Т-Банка (Angular) с тёмной темой из коробки | ✅ | Под каркас. npm: `@taiga-ui/core`, Angular 19+ |
+| R33 | [Taiga UI (Т-Банк)](https://taiga-ui.dev/), [Taiga 3.0 в Figma](https://www.figma.com/community/file/1220308188005380608/taiga-3-0) | Открытый UI-кит Т-Банка (Angular) с тёмной темой из коробки | 🟡 | Стек — React, поэтому только как образец: подходы и токены тёмной темы. Код не берём (Angular 19+) |
 | R34 | [Tinkoff Form Design System в Figma](https://www.figma.com/community/file/1154254456236039086/tinkoff-form-design-system) | Формы в стиле сайта Т-Банка | ❌ | Не берём |
 | R35 | [«Тестовое задание / Тинькофф» в Figma](https://www.figma.com/community/file/1264202898301557844) | Пример экранов в стиле Т-Банка | ❌ | Не берём |
 
@@ -133,9 +133,9 @@
 
 | № | Референс | Стек | Решение | Комментарий |
 |---|---|---|---|---|
-| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | ✅ | Kotlin + Compose |
-| R61 | [19Ishan/Banking-App-UI](https://github.com/19Ishan/19Ishan-Banking-App-UI) | Kotlin + Compose, MVVM, анимации | ✅ | Kotlin + Compose |
-| R62 | [theArtistSam/Flutter-BankApp](https://github.com/theArtistSam/Flutter-BankApp), [vinothvino42/Mobile-Banking-App-UI](https://github.com/vinothvino42/Mobile-Banking-App-UI), [тема mobile-banking](https://github.com/topics/mobile-banking) | Flutter | ✅ | Flutter |
+| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | 🟡 | Kotlin + Compose — образец архитектуры (слои data → domain ← ui, моки), код не переносим |
+| R61 | [19Ishan/Banking-App-UI](https://github.com/19Ishan/19Ishan-Banking-App-UI) | Kotlin + Compose, MVVM, анимации | 🟡 | Kotlin + Compose — образец анимаций, код не переносим |
+| R62 | [theArtistSam/Flutter-BankApp](https://github.com/theArtistSam/Flutter-BankApp), [vinothvino42/Mobile-Banking-App-UI](https://github.com/vinothvino42/Mobile-Banking-App-UI), [тема mobile-banking](https://github.com/topics/mobile-banking) | Flutter | 🟡 | Flutter — образец разбивки экранов и навигации, код не переносим |
 
 ---
 
