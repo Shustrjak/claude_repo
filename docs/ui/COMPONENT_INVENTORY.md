@@ -25,7 +25,7 @@
 | `Button` | `button` | Основа для `ActionButton` |
 | `IconButton` | `icon-button` | Кнопки в шапке: назад, поиск, уведомления |
 | `Input` | `input` | Текстовые поля: комментарий, поиск, номер счёта, БИК |
-| `PhoneInput` | `intl-phone-input` | PAY-04; возможно AUTH-02 [R] |
+| `PhoneInput` | `intl-phone-input` | PAY-04. Нужен ли в регистрации, решится вместе с Q-22 |
 | `AmountInput` | `amount-input` | Сумма платежа |
 | `Money` | `amount` | Отображение суммы и баланса с валютой |
 | `CodeInput` | `code-input` | Ввод OTP-кода (в задаче назывался OTPInput) |
@@ -42,6 +42,8 @@
 | `Stack` | `stack`, `gap`, `grid` | Раскладка. В задаче было три примитива: Stack, Row, Container |
 | `Cell` | `pure-cell` | Строка списка: иконка, текст, значение. **Добавлен**: основа для `ListRow`, `TransactionRow`, `NotificationItem` |
 | `BottomSheet` | `bottom-sheet` | Шторка. Нужна, если PST-01 или HOME-04 окажутся шторками [A] |
+
+Три пакета Alfa семантические компоненты используют **напрямую**, без отдельного примитива: `bank-card` или `card-image` (в `BankCard`), `system-message` (в `StatusMessage`), `status-badge` или `status` (в `StatusBadge`). У каждого пакета ровно один потребитель, поэтому отдельная обёртка не нужна. Так же глобальные компоненты используют `navigation-bar` и `tab-bar`.
 
 ### Изменения относительно списка из задачи
 
@@ -118,7 +120,7 @@
 
 В Alfa есть свой пакет `action-button` — круглая кнопка быстрого действия с подписью. Семантический `ActionButton` из этой спецификации — это **другой** компонент, обёртка над `button`.
 
-Предложение: наш компонент называется `ActionButton` и живёт в своём слое. Если понадобится Alfa-версия, импортировать её под другим именем. См. [Q-19](UI_ARCHITECTURE.md#открытые-вопросы).
+**Правило (Q-19 закрыт по правилу слоёв):** имена слоя B — наши. Если пакет Alfa называется так же, он импортируется под псевдонимом с префиксом `Alfa`, например `AlfaActionButton`, `AlfaStatusBadge`.
 
 ---
 
@@ -128,32 +130,32 @@
 
 | Компонент | Экраны | Кол-во | Флоу |
 |---|---|---|---|
-| `AppShell`, `AppHeader` | Все экраны | 30 + PST | Все |
-| `BottomNavigation` | HOME-01 и другие экраны после входа [A] | — | G, H |
+| `AppShell`, `AppHeader` | Все подтверждённые экраны | 29 + PST | Все |
+| `BottomNavigation` | В составе `AppShell(main)` [A]. На каких экранах показывается — UNKNOWN | — | G, H |
 | `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, SBP-03, SET-02, PST-01, PST-02, PST-03 | 12 | A, B, C, D, E |
-| `ListRow` | AUTH-06, HOME-04, ACC-01, ACC-07, PAY-02, CARD-01, SBP-03, SET-01, SET-03 | 9 | B, E, F, G |
+| `ListRow` | AUTH-06, HOME-04, ACC-07, SET-01, SET-03; HOME-01, ACC-01, PAY-02, CARD-01, SBP-03 [A] | 10 | B, E, F, G |
 | `AsyncContent` | HOME-01, HOME-02, HOME-03, ACC-01, ACC-02, ACC-03, CARD-01, SVC-03, NOTIF-01 | 9 | G |
-| `StatusMessage` | AUTH-01, HOME-02, ACC-02, ACC-03, PAY-03, SVC-03, NOTIF-01, SET-03 и все экраны с `AsyncContent` | 8+ | Все |
+| `StatusMessage` | HOME-02, ACC-02, ACC-03, SVC-03, NOTIF-01, PST-03; AUTH-01, PAY-03, SET-03 [A]; и все экраны с `AsyncContent` | 9+ | Все |
 | `PaymentForm` | PAY-04, PAY-06; PAY-02 и PAY-03 [A] | 2–4 | C, D |
 | `RecipientInput` | PAY-04, PAY-06 | 2 | C, D |
-| `PaymentSummary` | PAY-04, PAY-06, PST-01, PST-02 | 4 | C, D |
-| `PaymentConfirmation` | PST-01 — общий шаг для PAY-02…06 | 1 состояние, 5 флоу | C, D |
-| `OperationStatus` | AUTH-04, SBP-03 [A], SET-02 [A], PST-02 | 4 | B, C, D, E |
+| `PaymentSummary` | PST-01, PST-02; PAY-04, PAY-06 [A] | 4 | C, D |
+| `PaymentConfirmation` | PST-01 — общий шаг для PAY-04, PAY-06; PAY-02, PAY-03 [A] | 1 состояние, 4 флоу | C, D |
+| `OperationStatus` | PST-02; AUTH-04, SBP-03, SET-02 [A] | 4 | B, C, D, E |
 | `MPINInput` | AUTH-01, AUTH-06, SET-02; PST-01 [A] | 3–4 | A, B, E |
 | `ChoiceList` | AUTH-03, SET-04 | 2 | B, E |
 | `PaymentMethodSelector` | SBP-01; PAY-01 [A] | 1–2 | C, D |
 | `AccountCard` | ACC-01; HOME-01 [A] | 1–2 | G |
-| `TransactionList` | ACC-02, ACC-03 | 2 | G |
+| `TransactionList` | ACC-02, ACC-03; HOME-01 [A] | 2–3 | G |
 | `TransactionRow` | Внутри `TransactionList` | 2 | G |
-| `StatusBadge` | Внутри `TransactionRow`, `BankCard`, `OperationStatus` | — | — |
+| `StatusBadge` | Внутри `TransactionRow`, `BankCard`, `AccountCard`, `OperationStatus` | — | — |
 | `BankCard` | CARD-01 [A] | 1 | G |
 | `ServiceTile` | HOME-04 [A] | 1 | G |
-| `OTPVerification` | AUTH-07; SET-02 [A] | 1–2 | B, E |
+| `OTPVerification` | AUTH-07; SET-02 — UNKNOWN (Q-07) | 1–2 | B, E |
 | `AuthMethodSelector` | AUTH-01 | 1 | A |
 | `QRScanner` | PAY-03 | 1 | C, D, H |
 | `NotificationItem` | NOTIF-01 | 1 | G |
 | `SearchResult` | HOME-02 | 1 | G |
-| `RecipientSelector` | PAY-04…06 [R] — отложен | 0 | — |
+| `RecipientSelector` | PAY-04, PAY-06 [R] — отложен (Q-13) | 0 | — |
 
 ### Компоненты, которые используются на одном экране
 

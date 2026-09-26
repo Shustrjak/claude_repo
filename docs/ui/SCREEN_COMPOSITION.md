@@ -7,11 +7,13 @@
 
 | Метка | Значение |
 |---|---|
+| `[S]` | Из схемы, в том числе из названия узла |
 | `[A]` | Предложение, требованием не является |
 | `[R]` | Из ROADMAP, на схеме нет |
+| `[D-xx]` | Принятое решение |
 | `UNKNOWN` | Схема не описывает содержимое |
 
-Каждый экран собран в `AppShell`. У экранов до входа вариант `auth` (без нижней навигации), после входа — `main` [A].
+Каждый экран собран в `AppShell`. У экранов до входа вариант `auth` (без нижней навигации), после входа — `main`: он уже содержит `BottomNavigation`, поэтому в деревьях она отдельно не показывается [A]. На каких экранах нижняя навигация видна на самом деле — UNKNOWN.
 
 ---
 
@@ -85,8 +87,7 @@ AppShell(main)
 ├── AsyncContent
 │   ├── AccountCard                                    [A]
 │   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10)
-├── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
-└── BottomNavigation
+└── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 ```
 
 ```
@@ -114,7 +115,6 @@ AppShell(main)
 └── ListRow(link) или ServiceTile × 9   [D-04]; вид — [A]
     ACC-01, PAY-01, PAY-02, CARD-01, SVC-01, SVC-02, SVC-03, SVC-04, SBP-01
     (кандидаты SVC-01, SVC-02, SVC-04 — в состоянии «недоступно», Q-12)
-    (место под зарезервированные разделы CREDIT, CASHBACK, SAVE — D-05)
 ```
 
 ## ACC
@@ -133,7 +133,7 @@ ACC-02 Mini Statement
 AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
-    └── TransactionList(variant=compact)
+    └── TransactionList(variant=compact)   [S — «Mini Statement»]
 ```
 
 ```
@@ -142,7 +142,7 @@ AppShell(main)
 ├── AppHeader(back)
 ├── UNKNOWN — фильтр периода      (Q-11)
 └── AsyncContent
-    └── TransactionList(variant=full)
+    └── TransactionList(variant=full)      [S — «Detailed Statement»]
 ```
 
 ```
@@ -222,7 +222,7 @@ AppShell(auth)                    [A] — находится в ветке Open 
 
 ## Зарезервированные разделы
 
-**CREDIT, CASHBACK, SAVE** — место в меню оставлено, экраны проектируются отдельно [D-05].
+**CREDIT, CASHBACK, SAVE** — префиксы зарезервированы, экраны и их место в навигации проектируются отдельно [D-05].
 
 ## Предложенные состояния платежа
 
@@ -267,7 +267,7 @@ SVC-03 Locate Branch
 AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
-    └── UNKNOWN — список или карта отделений (Q-11, Q-12)
+    └── UNKNOWN — список или карта отделений (Q-11)
 ```
 
 **SVC-01 Deposits & OD, SVC-02 Trading, SVC-04 Other Services** — кандидаты, композиция не проектируется ([Q-12](SCREEN_INVENTORY.md#q-12)).
@@ -279,7 +279,7 @@ NOTIF-01 Notifications
 AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
-    ├── NotificationItem × N
+    ├── NotificationItem × N          [S — «Notifications»]; поля — Q-11
     └── StatusMessage(empty)
 ```
 
@@ -292,8 +292,7 @@ AppShell(main)
 ├── ListRow(link)    → SET-02 Change MPIN
 ├── ListRow(link)    → SET-03 Biometric Login
 ├── ListRow(link)    → SET-04 Change Language
-├── ListRow(danger)  → действие Logout (N42)
-└── BottomNavigation
+└── ListRow(danger)  → действие Logout (N42)
 ```
 
 ```
@@ -355,7 +354,7 @@ AppShell(main)
 | AUTH-05 | ● | | | | | | | | | | — |
 | AUTH-06 | ● | ● | | | | ● | | | | | — |
 | AUTH-07 | | | ● | | | | | | | | — |
-| HOME-01 | | | | | | ○ | ● | | | | `AccountCard` ○, `TransactionList` ○, `BottomNavigation` |
+| HOME-01 | | | | | | ○ | ● | | | | `AccountCard` ○, `TransactionList` ○ |
 | HOME-02 | | | | | | | ● | ● | | | `SearchResult` |
 | HOME-03 | | | | | | | ● | | | | — |
 | HOME-04 | | | | | | ● | | | | | `ServiceTile` ○ |
@@ -373,7 +372,7 @@ AppShell(main)
 | CARD-01 | | | | | | ○ | ● | | | | `BankCard` ○ |
 | SVC-03 | | | | | | | ● | ● | | | — |
 | NOTIF-01 | | | | | | | ● | ● | | | `NotificationItem` |
-| SET-01 | | | | | | ● | | | | | `BottomNavigation` |
+| SET-01 | | | | | | ● | | | | | — |
 | SET-02 | ● | ● | ○ | | ○ | | | | | | — |
 | SET-03 | | | | | | ● | | ○ | | | — |
 | SET-04 | | | | ● | | | | | | | — |
@@ -385,11 +384,11 @@ AppShell(main)
 
 ## Анализ дублирования
 
-Здесь только **выявлено**, что может оказаться дублем или вариантом. Решения не приняты, пока не будет ответов на вопросы.
+Здесь выявлено, что может оказаться дублем или вариантом. Где в столбце «Статус» указан вопрос, решения нет. Форма показа (экран, шторка, переключатель) на данные не влияет, поэтому вопрос Q-10 API-контракт не блокирует.
 
 | Что | Вид | Предложение | Статус |
 |---|---|---|---|
-| N29 — второй Card Services | Дубль экрана | Ссылается на CARD-01, отдельной реализации нет | Принято как дубль до ответа на Q-15 |
+| N29 — второй Card Services | Дубль экрана | Ссылается на CARD-01, отдельной реализации нет | Закрыто: дубль (Q-15) |
 | N35 Pay, N36 Scan QR в нижней навигации | Пункты навигации | Ведут на PAY-01 и PAY-03 | Из схемы |
 | N34 Go to Home | Пункт навигации | Ведёт на HOME-01 | Из схемы |
 | SBP-02 Функции СБП и SBP-01 СБП | Разные узлы | Не объединять: SBP-02 стоит рядом с Settings | Решено [D-04] |
