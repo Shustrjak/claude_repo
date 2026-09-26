@@ -100,48 +100,48 @@
 
 | № | Референс | Что внутри | Решение | Комментарий |
 |---|---|---|---|---|
-| R42 | [Banking App UI Kit, светлая и тёмная тема, 43+ экрана](https://www.figma.com/community/file/1320093355098935734/free-banking-mobile-app-ui-kit-with-light-dark-mode-high-quality-ui-43-screen-template) | Полный набор экранов в двух темах | ⬜ | |
-| R43 | [Payment Banking Mobile App](https://www.figma.com/community/file/1152191124533385497/free-figma-ui-kit-payment-banking-mobile-app-community) | Банкинг, кошелёк, крипта, инвестиции | ⬜ | |
-| R44 | [Finance Apps Onboarding UI Kit](https://www.figma.com/community/file/1507306691977001418/free-finance-apps-onboarding-ui-kit) | Только онбординг | ⬜ | |
-| R45 | [Free Finance UI Kit, 30 экранов и стайлгайд](https://www.figma.com/community/file/1259559940863317584/free-finance-ui-kit) | Экраны и стайлгайд | ⬜ | |
-| R46 | [Free Finance Banking UI Kit](https://www.figma.com/community/file/1036356407585866248/free-finance-banking-ui-kit) | Переводы, кошелёк, банк | ⬜ | |
-| R47 | [FinTech UI kit (Free)](https://www.figma.com/community/file/1364897819916971629/fintech-ui-kit-free) | Библиотека компонентов для банков, отдельный раздел финансовых компонентов | ⬜ | |
-| R48 | [Fintech UI Kit, бесплатная версия](https://www.figma.com/community/file/1212747172059114028/fintech-ui-kit-free-version) | Финансы, инвестиции, банкинг | ⬜ | |
-| R49 | [BanKitka, Fintech & Crypto UI Kit](https://www.figma.com/community/file/1394634547875877901/bankitka-fintech-crypto-mobile-app-ui-kit) | Финтех и крипта, аналитика | ⬜ | |
-| R50 | [Paychain, Finance & Bank App UI Kit (free)](https://www.figma.com/community/file/1409462981462764804/paychain-finance-bank-app-ui-kit-v-1-1-free-version) | Банк и платежи | ⬜ | |
-| R51 | [Bank App iOS UI Kit](https://www.figma.com/community/file/974284148399607335/bank-app-ios-ui-kit) | 10+ экранов в стиле iOS | ⬜ | |
-| R52 | [Banking App Redesign](https://www.figma.com/community/file/1387354312081685012/banking-app-redesign) | Редизайн банковского приложения | ⬜ | |
+| R42 | [Banking App UI Kit, светлая и тёмная тема, 43+ экрана](https://www.figma.com/community/file/1320093355098935734/free-banking-mobile-app-ui-kit-with-light-dark-mode-high-quality-ui-43-screen-template) | Полный набор экранов в двух темах | ✅ | Светлая и тёмная темы |
+| R43 | [Payment Banking Mobile App](https://www.figma.com/community/file/1152191124533385497/free-figma-ui-kit-payment-banking-mobile-app-community) | Банкинг, кошелёк, крипта, инвестиции | ❌ | Не берём |
+| R44 | [Finance Apps Onboarding UI Kit](https://www.figma.com/community/file/1507306691977001418/free-finance-apps-onboarding-ui-kit) | Только онбординг | ✅ | Экраны онбординга → этап 1 |
+| R45 | [Free Finance UI Kit, 30 экранов и стайлгайд](https://www.figma.com/community/file/1259559940863317584/free-finance-ui-kit) | Экраны и стайлгайд | ✅ | Стайлгайд |
+| R46 | [Free Finance Banking UI Kit](https://www.figma.com/community/file/1036356407585866248/free-finance-banking-ui-kit) | Переводы, кошелёк, банк | ✅ | Экраны переводов и кошелька |
+| R47 | [FinTech UI kit (Free)](https://www.figma.com/community/file/1364897819916971629/fintech-ui-kit-free) | Библиотека компонентов для банков, отдельный раздел финансовых компонентов | ✅ | Финансовые компоненты |
+| R48 | [Fintech UI Kit, бесплатная версия](https://www.figma.com/community/file/1212747172059114028/fintech-ui-kit-free-version) | Финансы, инвестиции, банкинг | ✅ | Экраны банкинга |
+| R49 | [BanKitka, Fintech & Crypto UI Kit](https://www.figma.com/community/file/1394634547875877901/bankitka-fintech-crypto-mobile-app-ui-kit) | Финтех и крипта, аналитика | ✅ | Экраны аналитики → этап 8 |
+| R50 | [Paychain, Finance & Bank App UI Kit (free)](https://www.figma.com/community/file/1409462981462764804/paychain-finance-bank-app-ui-kit-v-1-1-free-version) | Банк и платежи | ✅ | Экраны банка и платежей |
+| R51 | [Bank App iOS UI Kit](https://www.figma.com/community/file/974284148399607335/bank-app-ios-ui-kit) | 10+ экранов в стиле iOS | ✅ | Экраны в стиле iOS |
+| R52 | [Banking App Redesign](https://www.figma.com/community/file/1387354312081685012/banking-app-redesign) | Редизайн банковского приложения | ✅ | Идеи редизайна |
 
 ## F. Статьи и UX-разборы
 
 | № | Референс | О чём | Решение | Комментарий |
 |---|---|---|---|---|
-| R53 | [Альфа: «Новый интернет-банк: почему делали с нуля» (Хабр)](https://habr.com/ru/company/alfa/blog/589687/) | Как Альфа переосмыслила структуру и сценарии, которые потом ушли в мобилку | ⬜ | |
-| R54 | [Flat Studio: паттерны Monobank, Revolut, Monzo и N26](https://www.flatstudio.co/blog/neobank-ux-patterns-daily-banking) | Сравнение паттернов: квесты, подсчета, аналитика | ⬜ | |
-| R55 | [Flat Studio: как необанки становятся суперапами](https://www.flatstudio.co/blog/neobank-financial-super-app) | Суперапп-стратегия, как у Т-Банка | ⬜ | |
-| R56 | [Eleken: 15 финтех-интерфейсов, которым доверяют](https://www.eleken.co/blog-posts/trusted-fintech-ui-examples) | UI-паттерны доверия на 15 реальных приложениях | ⬜ | |
-| R57 | [Spaceberry: UX-аудит Monobank](https://spaceberry.studio/work/monobank) | Разбор сильных и слабых мест Монобанка | ⬜ | |
+| R53 | [Альфа: «Новый интернет-банк: почему делали с нуля» (Хабр)](https://habr.com/ru/company/alfa/blog/589687/) | Как Альфа переосмыслила структуру и сценарии, которые потом ушли в мобилку | ❌ | Ничего полезного |
+| R54 | [Flat Studio: паттерны Monobank, Revolut, Monzo и N26](https://www.flatstudio.co/blog/neobank-ux-patterns-daily-banking) | Сравнение паттернов: квесты, подсчета, аналитика | ❌ | Ничего полезного |
+| R55 | [Flat Studio: как необанки становятся суперапами](https://www.flatstudio.co/blog/neobank-financial-super-app) | Суперапп-стратегия, как у Т-Банка | ❌ | Ничего полезного |
+| R56 | [Eleken: 15 финтех-интерфейсов, которым доверяют](https://www.eleken.co/blog-posts/trusted-fintech-ui-examples) | UI-паттерны доверия на 15 реальных приложениях | ❌ | Ничего полезного |
+| R57 | [Spaceberry: UX-аудит Monobank](https://spaceberry.studio/work/monobank) | Разбор сильных и слабых мест Монобанка | ❌ | Ничего полезного |
 
 ## G. Библиотеки экранов (нужен аккаунт)
 
 | № | Референс | Что даёт | Решение | Комментарий |
 |---|---|---|---|---|
-| R58 | [Mobbin: экраны банковских приложений](https://mobbin.com/explore/mobile/screens/bank-app), [Mobbin Finance+](https://mobbin.com/finance) | Скриншоты реальных банков по паттернам (онбординг, KYC, переводы) | ⬜ | |
-| R59 | [Page Flows: финтех](https://pageflows.com/web/products/finance/) | Видеозаписи пользовательских флоу реальных приложений | ⬜ | |
+| R58 | [Mobbin: экраны банковских приложений](https://mobbin.com/explore/mobile/screens/bank-app), [Mobbin Finance+](https://mobbin.com/finance) | Скриншоты реальных банков по паттернам (онбординг, KYC, переводы) | ⬜ | Ещё не смотрел |
+| R59 | [Page Flows: финтех](https://pageflows.com/web/products/finance/) | Видеозаписи пользовательских флоу реальных приложений | ⬜ | Ещё не смотрел |
 
 ## H. Open-source код (для реализации)
 
 | № | Референс | Стек | Решение | Комментарий |
 |---|---|---|---|---|
-| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | ⬜ | |
-| R61 | [19Ishan/Banking-App-UI](https://github.com/19Ishan/19Ishan-Banking-App-UI) | Kotlin + Compose, MVVM, анимации | ⬜ | |
-| R62 | [theArtistSam/Flutter-BankApp](https://github.com/theArtistSam/Flutter-BankApp), [vinothvino42/Mobile-Banking-App-UI](https://github.com/vinothvino42/Mobile-Banking-App-UI), [тема mobile-banking](https://github.com/topics/mobile-banking) | Flutter | ⬜ | |
+| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | ✅ | Kotlin + Compose |
+| R61 | [19Ishan/Banking-App-UI](https://github.com/19Ishan/19Ishan-Banking-App-UI) | Kotlin + Compose, MVVM, анимации | ✅ | Kotlin + Compose |
+| R62 | [theArtistSam/Flutter-BankApp](https://github.com/theArtistSam/Flutter-BankApp), [vinothvino42/Mobile-Banking-App-UI](https://github.com/vinothvino42/Mobile-Banking-App-UI), [тема mobile-banking](https://github.com/topics/mobile-banking) | Flutter | ✅ | Flutter |
 
 ---
 
 ## Решения
 
-Решения по R01–R41 проставлены в таблице выше и перенесены в [`ROADMAP.md`](../ROADMAP.md).
+Решения по R01–R62, кроме R58–R59, проставлены в таблице выше и перенесены в [`ROADMAP.md`](../ROADMAP.md).
 
 Шаблон, скопируй нужные строки:
 
