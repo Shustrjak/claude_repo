@@ -91,7 +91,7 @@
 |---|---|---|---|---|
 | R36 | [rebank, цифровой банк](https://www.behance.net/gallery/176160923/rebank-digital-bank-app-uxui) | Молодёжный банк из Аргентины. Около 5k апрув, полный кейс с GIF | ❌ | Не берём |
 | R37 | [Velora, Finance & Bank App](https://www.behance.net/gallery/235567799/Velora-Finance-Bank-App-UIUX-Case-Study) | Бюджеты, платежи, инвестиции. 2025 год | ❌ | Не берём |
-| R38 | [Fin i, UX-кейс и редизайн](https://www.behance.net/gallery/196435681/UX-Case-study-UI-Redesign-of-Fin-i-Banking-app) | Процесс редизайна от исследования до UI | ✅ | Карта приложения скачана, будет передана для проработки экранов |
+| R38 | [Fin i, UX-кейс и редизайн](https://www.behance.net/gallery/196435681/UX-Case-study-UI-Redesign-of-Fin-i-Banking-app) | Процесс редизайна от исследования до UI | ✅ | Карта флоу получена: [`R38-user-flow.jpg`](R38-user-flow.jpg). Разбор — [`docs/ui/`](../docs/ui/UI_ARCHITECTURE.md) |
 | R39 | [Monobank App Product Rethinking от Artem Pravda](https://www.behance.net/gallery/113442449/Monobank-App-Product-Rethinking-(UXUIUCD)) | Переосмысление Монобанка | ❌ | Не берём |
 | R40 | [Redesign Monobank от Tanya Nazarenko](https://www.behance.net/gallery/221022825/Redesign-Monobank-UXUI-Case-Study) | Ещё один редизайн Монобанка | ❌ | Не берём |
 | R41 | [Поиск «Альфа банк» на Behance](https://www.behance.net/search/projects/%D0%90%D0%BB%D1%8C%D1%84%D0%B0%20%D0%B1%D0%B0%D0%BD%D0%BA) и [поиск «Тинькофф»](https://www.behance.net/search/projects/?search=%D0%A2%D0%B8%D0%BD%D1%8C%D0%BA%D0%BE%D1%84%D1%84) | Концепты и редизайны Альфы и Т-Банка от дизайнеров | ❌ | Не берём |
