@@ -185,18 +185,19 @@ PAY-04 Pay to Mobile Number
 AppShell(main)
 ├── AppHeader(back)
 ├── PaymentForm(recipientType=mobile)
-│   ├── RecipientInput(type=mobile)
+│   ├── RecipientInput(type=mobile)   (телефон + банк получателя [D-06])
 │   ├── AmountInput
 │   └── Input(комментарий)
 ├── PaymentSummary                [A]
 └── ActionButton(action="next")   → PST-01
 ```
 
-**PAY-05 Pay to UPI ID** — кандидат: в СБП нет аналога UPI ID. Не проектируется до ответа на [Q-23](UI_ARCHITECTURE.md#открытые-вопросы).
+**Pay to UPI ID** со схемы убран: в СБП аналога нет [D-06].
 
 ```
 PAY-06 Pay to Bank Account
   то же, что PAY-04, но PaymentForm(recipientType=bankAccount): номер счёта и БИК [D-01]
+  остаётся в разделе СБП [D-06]
 ```
 
 ## СБП (внутри домена PAY)
@@ -212,7 +213,8 @@ AppShell(main)
 SBP-03 Подключение СБП            (на схеме — Register UPI)
 AppShell(auth)                    [A] — находится в ветке Open Account
 ├── AppHeader(back)
-├── UNKNOWN — шаги подключения (Q-23)
+├── ListRow(toggle)               «Банк по умолчанию для входящих переводов СБП» [D-06]; вид — [A]
+├── ActionButton(action="confirm")  [A]
 └── OperationStatus               [A]
 ```
 
@@ -367,7 +369,7 @@ AppShell(main)
 | PAY-04 | ● | | | | | | | | ● | ○ | `RecipientInput` |
 | PAY-06 | ● | | | | | | | | ● | ○ | `RecipientInput` |
 | SBP-01 | | | | | | | | | | | `PaymentMethodSelector` |
-| SBP-03 | ● | | | | ○ | | | | | | — |
+| SBP-03 | ● | | | | ○ | ○ | | | | | — |
 | CARD-01 | | | | | | ○ | ● | | | | `BankCard` ○ |
 | SVC-03 | | | | | | | ● | ● | | | — |
 | NOTIF-01 | | | | | | | ● | ● | | | `NotificationItem` |
@@ -392,7 +394,7 @@ AppShell(main)
 | N34 Go to Home | Пункт навигации | Ведёт на HOME-01 | Из схемы |
 | SBP-02 Функции СБП и SBP-01 СБП | Разные узлы | Не объединять: SBP-02 стоит рядом с Settings | Решено [D-04] |
 | PAY-01 Pay в меню и в нижней навигации | Один экран, два входа | Реализация одна | Решено [D-04] |
-| PAY-04, PAY-06 (и PAY-05, если останется) | **Варианты одного экрана** | Одна композиция, разный `recipientType`. Реализация одна | Архитектурное решение: экраны остаются в инвентаре, реализация общая |
+| PAY-04, PAY-06 | **Варианты одного экрана** | Одна композиция, разный `recipientType`. Реализация одна | Архитектурное решение: экраны остаются в инвентаре, реализация общая |
 | ACC-02 и ACC-03 | Варианты | Один `TransactionList`, варианты `compact` и `full` | Q-10 |
 | ACC-02 Mini Statement | Возможно, блок на главной | Может оказаться частью HOME-01, а не экраном | Q-10 |
 | AUTH-04 Bind SIM | Возможно, состояние AUTH-03 | `OperationStatus` после выбора SIM | Q-10 |

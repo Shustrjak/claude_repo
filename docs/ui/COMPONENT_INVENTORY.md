@@ -30,7 +30,7 @@
 | `Money` | `amount` | Отображение суммы и баланса с валютой |
 | `CodeInput` | `code-input` | Ввод OTP-кода (в задаче назывался OTPInput) |
 | `PassCode` | `pass-code` | Ввод MPIN с цифровой клавиатурой |
-| `Select` | `select` | Выбор из длинного списка, например банка [A] |
+| `Select` | `select`, `input-autocomplete` | Выбор из длинного списка с поиском: банк получателя в PAY-04 [D-06] |
 | `Radio` | `radio`, `radio-group` | Основа для `ChoiceList` |
 | `Switch` | `switch` | Переключатели (в задаче назывался Toggle) |
 | `Typography` | `typography` | Текст и заголовки (в задаче — Text и Heading) |
@@ -83,8 +83,8 @@
 | 8 | `TransactionRow` | Одна операция |
 | 9 | `TransactionList` | Список операций: `compact` или `full` |
 | 10 | `BankCard` | Изображение карты и её статус |
-| 11 | `PaymentMethodSelector` | Способы перевода: QR, телефон, счёт. UPI ID — кандидат (Q-23) |
-| 12 | `RecipientInput` | Ввод получателя под тип получателя |
+| 11 | `PaymentMethodSelector` | Способы перевода: QR, телефон, реквизиты |
+| 12 | `RecipientInput` | Ввод получателя: телефон и банк получателя или счёт и БИК |
 | 13 | `RecipientSelector` | Выбор получателя из контактов и недавних. **Отложен**: есть только в ROADMAP [R] |
 | 14 | `PaymentForm` | Получатель, сумма, комментарий и проверка полей |
 | 15 | `PaymentSummary` | Сводка: сумма, получатель, комиссия |
@@ -130,12 +130,12 @@
 |---|---|---|---|
 | `AppShell`, `AppHeader` | Все экраны | 30 + PST | Все |
 | `BottomNavigation` | HOME-01 и другие экраны после входа [A] | — | G, H |
-| `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, SBP-03, SET-02, PST-01, PST-02, PST-03; PAY-05 — кандидат | 12 | A, B, C, D, E |
-| `ListRow` | AUTH-06, HOME-04, ACC-01, ACC-07, PAY-02, CARD-01, SET-01, SET-03 | 8 | B, E, F, G |
+| `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, SBP-03, SET-02, PST-01, PST-02, PST-03 | 12 | A, B, C, D, E |
+| `ListRow` | AUTH-06, HOME-04, ACC-01, ACC-07, PAY-02, CARD-01, SBP-03, SET-01, SET-03 | 9 | B, E, F, G |
 | `AsyncContent` | HOME-01, HOME-02, HOME-03, ACC-01, ACC-02, ACC-03, CARD-01, SVC-03, NOTIF-01 | 9 | G |
 | `StatusMessage` | AUTH-01, HOME-02, ACC-02, ACC-03, PAY-03, SVC-03, NOTIF-01, SET-03 и все экраны с `AsyncContent` | 8+ | Все |
-| `PaymentForm` | PAY-04, PAY-06; PAY-02 и PAY-03 [A]; PAY-05 — кандидат | 2–4 | C, D |
-| `RecipientInput` | PAY-04, PAY-06; PAY-05 — кандидат | 2 | C, D |
+| `PaymentForm` | PAY-04, PAY-06; PAY-02 и PAY-03 [A] | 2–4 | C, D |
+| `RecipientInput` | PAY-04, PAY-06 | 2 | C, D |
 | `PaymentSummary` | PAY-04, PAY-06, PST-01, PST-02 | 4 | C, D |
 | `PaymentConfirmation` | PST-01 — общий шаг для PAY-02…06 | 1 состояние, 5 флоу | C, D |
 | `OperationStatus` | AUTH-04, SBP-03 [A], SET-02 [A], PST-02 | 4 | B, C, D, E |
