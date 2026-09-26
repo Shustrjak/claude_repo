@@ -33,7 +33,7 @@
 | `Select` | `select`, `input-autocomplete` | Выбор из длинного списка с поиском: банк получателя в PAY-04 [D-06] |
 | `Radio` | `radio`, `radio-group` | Основа для `ChoiceList` |
 | `Switch` | `switch` | Переключатели (в задаче назывался Toggle) |
-| `Checkbox` | `checkbox` | Согласие на push-уведомления и рассылки в AUTH-05 [D-15] |
+| `Checkbox` | `checkbox` | Два согласия в AUTH-05: на push-уведомления и на маркетинговые рассылки [D-19] |
 | `Typography` | `typography` | Текст и заголовки (в задаче — Text и Heading) |
 | `Icon` | Отдельный пакет иконок Alfa | Иконки. Какой именно пакет — проверить при старте проекта |
 | `Badge` | `badge` | Счётчик непрочитанных |
@@ -55,7 +55,7 @@
 | `OTPInput` | Переименован в `CodeInput` | Так называется пакет Alfa; семантика OTP живёт в `OTPVerification` |
 | `Toggle` | Переименован в `Switch` | Так называется пакет Alfa |
 | `Header`, `BackButton`, `BottomNavigation` | Перенесены в глобальные компоненты | Это каркас приложения, а не примитивы |
-| `Checkbox` | Был отложен, **возвращён** | Появился экран, где он нужен: согласие в AUTH-05 [D-15] |
+| `Checkbox` | Был отложен, **возвращён** | Появился экран, где он нужен: согласия в AUTH-05 [D-15, D-19] |
 | `Avatar` | **Отложен** | Экрана, где он нужен, нет: содержимое HOME-03 Profile — SOURCE_REQUIRED (Q-11) |
 | — | Добавлены `Money`, `PassCode`, `Cell`, `Skeleton`, `PhoneInput`, `Radio`, `BottomSheet` | Нужны экранам из инвентаря; все есть в Alfa |
 
@@ -80,13 +80,13 @@
 | 1 | `ActionButton` | Кнопка с намерением: `next`, `confirm`, `cancel`, `close`, `pay`, `retry` |
 | 2 | `AuthMethodSelector` | Биометрия или MPIN — при входе и при подтверждении платежа [D-13] |
 | 3 | `MPINInput` | Ввод MPIN из 4 цифр [D-09]: вход, создание, повтор |
-| 4 | `OTPVerification` | Ввод OTP, таймер, повторная отправка, ошибка |
+| 4 | `OTPVerification` | Ввод одноразового кода: OTP или код из письма; таймер, повторная отправка, ошибка |
 | 5 | `ChoiceList` | Выбор одного варианта: SIM, язык |
 | 6 | `OperationStatus` | Статус операции: идёт, успех, ошибка |
 | 7 | `AccountCard` | Счёт: название, номер, баланс |
 | 8 | `TransactionRow` | Одна операция |
 | 9 | `TransactionList` | Список операций: `compact` или `full` |
-| 10 | `BankCard` | Изображение карты и её статус |
+| 10 | `BankCard` | Изображение карты и её статус. **Ждёт источника:** CARD-01 — SOURCE_REQUIRED [D-20] |
 | 11 | `PaymentMethodSelector` | Способы перевода: QR, телефон, реквизиты |
 | 12 | `RecipientInput` | Ввод получателя: телефон и банк получателя или счёт и БИК |
 | 13 | `RecipientSelector` | Выбор получателя из контактов и недавних. **Не входит в v1** [D-12], в активных флоу не используется |
@@ -128,15 +128,15 @@
 
 ## Матрица переиспользования
 
-Считаются экраны из инвентаря и состояния PST. `[A]` — использование предложено, но не подтверждено источником. Экраны с содержимым SOURCE_REQUIRED (Q-11) и отключённые пункты навигации [D-11] компонентов не получают.
+Считаются экраны из инвентаря и состояния PST. `[A]` — использование предложено, но не подтверждено источником. Экраны с содержимым SOURCE_REQUIRED (Q-11, [D-20]) и отключённые пункты навигации [D-11] компонентов не получают.
 
 | Компонент | Экраны | Кол-во | Флоу |
 |---|---|---|---|
 | `AppShell`, `AppHeader` | Все подтверждённые экраны | 29 + PST | Все |
 | `BottomNavigation` | В составе `AppShell(main)` [A]. На каких экранах показывается — UNKNOWN | — | G, H |
 | `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, PST-01, PST-02, PST-03; ACC-07, SBP-03, SET-02 [A] | 13 | A, B, C, D, E, F |
-| `ListRow` | AUTH-01, AUTH-06, HOME-04, ACC-07, SET-01, SET-03; HOME-01, CARD-01, SBP-03 [A] | 9 | A, B, D, E, F, G |
-| `AsyncContent` | HOME-01, ACC-02, CARD-01 | 3 | G |
+| `ListRow` | AUTH-01, AUTH-06, HOME-04, ACC-07, SBP-01, SET-01, SET-03; HOME-01, SBP-03 [A] | 9 | A, B, D, E, F, G |
+| `AsyncContent` | HOME-01, ACC-02 | 2 | G |
 | `StatusMessage` | ACC-02, PST-03; AUTH-01, PAY-03, SET-03 [A]; и все экраны с `AsyncContent` | 5+ | A, C, E, G |
 | `MPINInput` | AUTH-01, AUTH-06, SET-02, PST-01 | 4 | A, B, C, E |
 | `OperationStatus` | PST-02, SET-02; AUTH-04, SBP-03 [A] | 4 | B, C, D, E |
@@ -144,7 +144,7 @@
 | `PaymentForm` | PAY-04, PAY-06; PAY-03 [A] | 2–3 | C, D |
 | `RecipientInput` | PAY-04, PAY-06 | 2 | C, D |
 | `ChoiceList` | AUTH-03, SET-04 | 2 | B, E |
-| `OTPVerification` | AUTH-07 (онбординг), SET-02 (чувствительная операция) [D-10] | 2 | B, E |
+| `OTPVerification` | AUTH-07 (OTP онбординга), SET-02 (OTP чувствительной операции) [D-10], AUTH-05 (код подтверждения почты) [D-19] | 3 | B, E |
 | `AuthMethodSelector` | AUTH-01, PST-01 [D-13] | 2 | A, C |
 | `PaymentConfirmation` | PST-01 — общий шаг для PAY-04, PAY-06; PAY-03 [A] | 1 состояние, 3 флоу | C, D |
 | `TransactionList` | ACC-02; HOME-01 [A] | 1–2 | G |
@@ -153,7 +153,7 @@
 | `PaymentMethodSelector` | SBP-01 | 1 | C, D |
 | `QRScanner` | PAY-03 | 1 | C, D, H |
 | `AccountCard` | HOME-01 [A] | 0–1 | G |
-| `BankCard` | CARD-01 [A] | 0–1 | G |
+| `BankCard` | CARD-01 — SOURCE_REQUIRED [D-20] | 0 | — |
 | `ServiceTile` | HOME-04 [A] | 0–1 | G |
 | `NotificationItem` | NOTIF-01 — SOURCE_REQUIRED (Q-11) | 0 | — |
 | `SearchResult` | HOME-02 — SOURCE_REQUIRED (Q-11) | 0 | — |
@@ -166,9 +166,8 @@
 | `QRScanner` | PAY-03 | Работа с камерой: доступ, ошибки, распознавание. Открывается и из СБП, и из нижней навигации |
 | `PaymentMethodSelector` | SBP-01 | Способ перевода — понятие домена платежей, а не экрана. Содержимое PAY-01 неизвестно (Q-11) |
 | `AccountCard` | HOME-01 [A] | Счёт — доменная сущность. Содержимое ACC-01 неизвестно (Q-11) |
-| `BankCard` | CARD-01 [A] | Карта — доменная сущность |
 | `ServiceTile` | HOME-04 [A] | Один из двух вариантов вида меню, второй — `ListRow` |
-| `NotificationItem`, `SearchResult` | Нет | Ждут источника для NOTIF-01 и HOME-02 (Q-11). Входных данных не проектируем |
+| `NotificationItem`, `SearchResult`, `BankCard` | Нет | Ждут источника для NOTIF-01, HOME-02 и CARD-01 (Q-11, [D-20]). Входных данных не проектируем |
 | `RecipientSelector` | Нет | Не входит в v1 [D-12] |
 
 Специфичных для экрана компонентов вроде `LoginButton` или `PaymentScreenHeader` в спецификации **нет**.
