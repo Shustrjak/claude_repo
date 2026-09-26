@@ -133,7 +133,7 @@
 
 | № | Референс | Стек | Решение | Комментарий |
 |---|---|---|---|---|
-| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | 🟡 | Kotlin + Compose — образец архитектуры (слои data → domain ← ui, моки), код не переносим |
+| R60 | [alexandr7035/Banking-App-Mock-Compose](https://github.com/alexandr7035/Banking-App-Mock-Compose) | Kotlin + Jetpack Compose, слои data → domain ← ui | 🟡 | Kotlin + Compose — образец архитектуры (слои data → domain ← ui, данные через подменяемый источник), код не переносим |
 | R61 | [19Ishan/Banking-App-UI](https://github.com/19Ishan/19Ishan-Banking-App-UI) | Kotlin + Compose, MVVM, анимации | 🟡 | Kotlin + Compose — образец анимаций, код не переносим |
 | R62 | [theArtistSam/Flutter-BankApp](https://github.com/theArtistSam/Flutter-BankApp), [vinothvino42/Mobile-Banking-App-UI](https://github.com/vinothvino42/Mobile-Banking-App-UI), [тема mobile-banking](https://github.com/topics/mobile-banking) | Flutter | 🟡 | Flutter — образец разбивки экранов и навигации, код не переносим |
 
