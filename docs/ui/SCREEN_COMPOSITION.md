@@ -107,7 +107,7 @@ HOME-01 Home
 AppShell(main)
 ├── AppHeader(actions = поиск, уведомления, профиль)   [A]
 ├── AsyncContent
-│   ├── AccountCard × N                                [D-21, D-22]; какие счета показывать — Q-29
+│   ├── AccountCard × N                                [D-21, D-22]; все счета, в порядке адаптера [D-47]
 │   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10); по одному счёту [D-23], какому — Q-30
 └── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 ```
