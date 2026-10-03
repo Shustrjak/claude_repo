@@ -27,7 +27,7 @@ DemoAdapter | NullAdapter | FutureRealBankAdapter (в задаче — RealBankA
 | Метка | Значение |
 |---|---|
 | `[SOURCE]` | Явный источник: схема R38 ([`refs/R38-user-flow.jpg`](../../refs/R38-user-flow.jpg)) |
-| `[DECISION]` | Утверждённое решение D-01…D-24 |
+| `[DECISION]` | Утверждённое решение D-01…D-25 |
 | `[SCREEN]` | Утверждённый экран, его композиция или вход семантического компонента без метки `[A]` |
 | `[FLOW]` | Утверждённый пользовательский флоу |
 | `[TECHNICAL]` | Строго необходимое техническое поле. Обоснование указано всегда; продуктовую функциональность так не вводим |
@@ -102,7 +102,7 @@ type CodeDelivery = { destinationMasked: string; codeLength: number; resendAfter
 | `UNKNOWN` | Прочий сбой | Любая необработанная ошибка | `StatusMessage(error)`, `OperationStatus(failure)` | `[TECHNICAL]` ошибка без отдельной обработки |
 | `VALIDATION_FAILED` | Проверка данных | Поля не прошли проверку адаптера | Ошибка у поля (`fields`) | `[TECHNICAL]` форма проверяет только формат, окончательная проверка — у адаптера (G-2) |
 | `SESSION_EXPIRED` | Аутентификация | Сессии нет или она закончилась | Переход на AUTH-01 | `[DECISION]` D-08: без сессии — AUTH-01 |
-| `STATE_CONFLICT` | Нарушен порядок шагов | Вход без регистрации на этом экземпляре приложения; `submitPersonalDetails` без подтверждённой почты; `changeMpin` без подтверждённого OTP; поля карты не соответствуют `onboardingContext` | `StatusMessage(error)` | `[TECHNICAL]` защита правил D-10, D-18, D-19 и G-1 |
+| `STATE_CONFLICT` | Нарушен порядок шагов или состояние не позволяет операцию | Вход без регистрации на этом экземпляре приложения; `submitPersonalDetails` без подтверждённой почты; `changeMpin` без подтверждённого OTP; поля карты не соответствуют `onboardingContext`; счёт списания заблокирован (`fields: ["sourceAccountId"]`) | `StatusMessage(error)`; для перевода — PST-02 | `[TECHNICAL]` защита правил D-10, D-18, D-19 и G-1; `[DECISION]` D-25 |
 | `MPIN_INVALID` | Аутентификация | Неверный MPIN | AUTH-01, PST-01 | `[SCREEN]` `MPINInput.error`; G-2 «верен ли MPIN» |
 | `CODE_INVALID` | Проверка кода | Неверный или просроченный OTP или код из письма | AUTH-07 (Failure → AUTH-03), SET-02, AUTH-05 | `[SOURCE]` AUTH-07 Failure; `[DECISION]` D-19 «код неверный» |
 | `AGE_RESTRICTION` | Проверка данных | Возраст меньше 18 лет | AUTH-05 | `[DECISION]` D-15 «дата рождения (18+)» |
@@ -190,7 +190,7 @@ type CardDetails = { number: string; expiry: string };
 | `firstName`, `lastName` | строка | да | `[DECISION]` D-15 «имя, фамилия» |
 | `birthDate` | `YYYY-MM-DD` | да | `[DECISION]` D-15 «дата рождения (18+)»; `[TECHNICAL]` формат ISO 8601 |
 | `address.postalCode`, `region`, `city`, `district`, `street`, `house` | строка | да | `[DECISION]` D-15 «индекс, регион, город, район, улица, дом» |
-| `address.apartment` | строка | `NEEDS_DECISION · CQ-01` | `[DECISION]` D-15 «квартира» |
+| `address.apartment` | строка; пустая строка — квартиры нет | `NEEDS_DECISION · CQ-01` | `[DECISION]` D-15 «квартира»; `[TECHNICAL]` пустая строка — чтобы тип не зависел от ответа на CQ-01 |
 | `email` | строка | да; та же, что подтверждена в `verifyEmailCode` | `[DECISION]` D-15, D-19 |
 | `consents.push` | `boolean` | да | `[DECISION]` D-19 «согласие на push-уведомления» |
 | `consents.marketing` | `boolean` | да | `[DECISION]` D-19 «согласие на маркетинговые рассылки» |
@@ -318,11 +318,12 @@ changeMpin(req: { newMpin: string }): Promise<Result<void>>
 
 ### G. Счёт
 
-#### `getAccounts` — счета клиента · `NEEDS_DECISION · CQ-09`
+#### `getAccounts` — счета клиента · `STABLE`
 
 ```ts
 getAccounts(): Promise<Result<AccountSummary[]>>
-type AccountSummary = { id: string; name: string; maskedNumber: string; balance: Money; status: "active" | "blocked" };
+type AccountSummary = { id: string; name: string; maskedNumber: string; balance: Money; status: AccountStatus };
+type AccountStatus = "active" | "blocked";
 ```
 
 | Поле | Тип | Происхождение |
@@ -331,9 +332,10 @@ type AccountSummary = { id: string; name: string; maskedNumber: string; balance:
 | `name` | строка | `[SCREEN]` `AccountCard.name` |
 | `maskedNumber` | строка | `[SCREEN]` `AccountCard.maskedNumber` |
 | `balance` | `Money` | `[SCREEN]` `AccountCard.balance` «сумма и валюта» |
-| `status` | `"active" \| "blocked"` | `[SCREEN]` поле — вход `AccountCard.status`, `StatusBadge`. Значения взяты из состояний `AccountCard` «обычное, счёт заблокирован», а они помечены `[A]`. Предложения `[A]` в контракт не попадают, поэтому набор значений не утверждён — CQ-09 |
+| `status` | `AccountStatus` | `[SCREEN]` вход `AccountCard.status`, `StatusBadge`; `[DECISION]` D-25 — значения `active` и `blocked`, других в v1 нет |
 
 - **Зачем:** `[DECISION]` D-21 — главной нужны минимальные данные счёта; D-22 — счетов у клиента может быть несколько.
+- **Смысл статуса в v1** `[DECISION]` D-25. `blocked` — счёт нельзя указать как `sourceAccountId` в `confirmTransfer`. Других следствий v1 не определяет: про входящие переводы, выписку, закрытие, разблокировку и другие операции контракт ничего не говорит. `active` значит только «не заблокирован»: остальные проверки перевода действуют как обычно. Причины, даты и виды ограничений в контракт не входят.
 - Ответ — список из нуля, одного или нескольких счетов. Пустой список — счетов нет (так отвечает `NullAdapter`).
 - В контракте нет признаков «основной» или «по умолчанию». Какие счета показывает главная — вопрос UI, не контракта (Q-29).
 - `AccountSummary.id` — единственный идентификатор счёта в контракте. Им же счёт называют `getRecentTransactions` (D-23) и `confirmTransfer` (D-24).
@@ -385,7 +387,7 @@ type TransferLimits = { min: Money; max: Money };
 
 Ошибки: `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
-#### `confirmTransfer` — подтвердить перевод · `STABLE · CQ-01, CQ-04, CQ-06`
+#### `confirmTransfer` — подтвердить перевод · `NEEDS_DECISION · CQ-06`; также CQ-01, CQ-04
 
 ```ts
 confirmTransfer(req: TransferRequest): Promise<Result<TransferResult>>
@@ -422,9 +424,12 @@ type TransferResult = { status: "success" | "pending" };
 - Отдельной «подготовки платежа» нет: PST-01 показывает данные, которые уже есть у формы. Существует ли получатель, адаптер проверяет здесь (G-2).
 - **Счёт списания — ровно один и обязателен** `[DECISION]` D-24. Правило контракта не зависит от числа счетов. Как его получает UI: один счёт — приложение подставляет его само; несколько — пользователь выбирает счёт в форме этого перевода. Счетов нет — перевод отправить нельзя, см. Q-31.
 - Выбранный счёт — состояние конкретного перевода, а не настройка. Признаков «счёт по умолчанию» или «основной счёт» нет.
-- Неизвестный или чужой `sourceAccountId` — `VALIDATION_FAILED` с `fields: ["sourceAccountId"]`. Можно ли переводить со счёта со статусом `blocked`, решает адаптер (G-2); сами значения статуса не утверждены — CQ-09.
+- Неизвестный или чужой `sourceAccountId` — `VALIDATION_FAILED` с `fields: ["sourceAccountId"]`.
+- Счёт со статусом `blocked` — `STATE_CONFLICT` с `fields: ["sourceAccountId"]` `[DECISION]` D-25. Проверяет адаптер (G-2). Флоу заранее не считает такой счёт допустимым, но окончательная проверка — у адаптера.
+- `comment` остаётся `comment?: string` при любом ответе на CQ-01: если комментарий станет обязательным, отсутствие — `VALIDATION_FAILED`.
+- **Блокер CQ-06.** Если ФИО получателя при переводе по реквизитам окажется обязательным, в `recipient` для `bankAccount` появится обязательное поле. Поэтому статус операции — `NEEDS_DECISION`.
 - `failure` на PST-02 — это `ok: false` с кодом ошибки.
-- Ошибки: `MPIN_INVALID`, `AMOUNT_OUT_OF_LIMITS`, `INSUFFICIENT_FUNDS`, `RECIPIENT_NOT_FOUND`, `VALIDATION_FAILED`, `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
+- Ошибки: `MPIN_INVALID`, `AMOUNT_OUT_OF_LIMITS`, `INSUFFICIENT_FUNDS`, `RECIPIENT_NOT_FOUND`, `VALIDATION_FAILED`, `STATE_CONFLICT`, `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
 ### J. СБП
 
@@ -520,10 +525,10 @@ setLanguage(req: { code: string }): Promise<Result<void>>
 | `verifyEmailCode` | E | AUTH-05 / B | `{ code }` | — | DECISION D-19 | `verifyEmailCode` | STABLE |
 | `setMpin` | F | AUTH-06 / B | `{ mpin }` | — | SOURCE N09; DECISION D-09 | `setMpin` | STABLE |
 | `changeMpin` | F | SET-02 / E | `{ newMpin }` | — | SOURCE N39; DECISION D-09, D-10 | `changeMpin` | STABLE |
-| `getAccounts` | G | HOME-01; PAY-04, PAY-06 / C, G | — | `AccountSummary[]` | DECISION D-07, D-21, D-22, D-24; SCREEN `AccountCard` | `getAccounts` | NEEDS_DECISION · CQ-09 |
+| `getAccounts` | G | HOME-01; PAY-04, PAY-06 / C, G | — | `AccountSummary[]` | DECISION D-07, D-21, D-22, D-24, D-25; SCREEN `AccountCard` | `getAccounts` | STABLE |
 | `getRecentTransactions` | H | ACC-02 / G | `{ accountId, limit }` | `Transaction[]` | SOURCE N20; SCREEN ACC-02; DECISION D-23 | `getRecentTransactions` | STABLE |
 | `getTransferLimits` | I | PAY-04, PAY-06 / C | `{ method }` | `TransferLimits` | SCREEN `PaymentForm.limits` | `getTransferLimits` | STABLE |
-| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13, D-24 | `confirmTransfer` | STABLE · CQ-01, CQ-04, CQ-06 |
+| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13, D-24, D-25 | `confirmTransfer` | NEEDS_DECISION · CQ-06; также CQ-01, CQ-04 |
 | `findRecipientBanks` | J | PAY-04 / C, D | `{ phone }` | `Bank[]` | DECISION D-06 | `findRecipientBanks` | STABLE |
 | `getSbpDefaultBank` | J | SBP-03 / D | — | `{ isDefault }` | SOURCE N16; DECISION D-06, D-17 | `getSbpDefaultBank` | STABLE |
 | `setSbpDefaultBank` | J | SBP-03 / D | — | — | DECISION D-06, D-08, D-17 | `setSbpDefaultBank` | STABLE · CQ-05 |
@@ -585,7 +590,7 @@ interface BankingAdapter {
 |---|---|---|---|
 | `getAccounts`, `findRecipientBanks` | `[]` | Демо-данные из JSON; у `getAccounts` — ноль, один или несколько счетов | Запрос к банку |
 | `getRecentTransactions` | `[]` при любом `accountId`: счетов нет, операций тоже (G-6) | Демо-операции только этого счёта; неизвестный `accountId` — `VALIDATION_FAILED` | Запрос к банку |
-| `confirmTransfer` | `UNAVAILABLE`; счёт списания не подставляет и не придумывает | Принимает только `sourceAccountId` демо-счёта, иначе `VALIDATION_FAILED`; остальное — по демо-правилам, без сложной банковской логики | Запрос к банку |
+| `confirmTransfer` | `UNAVAILABLE`; счёт списания не подставляет и не придумывает | Принимает только `sourceAccountId` демо-счёта, иначе `VALIDATION_FAILED`; демо-счёт `blocked` — `STATE_CONFLICT` [D-25]; остальное — по демо-правилам, без сложной банковской логики | Запрос к банку |
 | `getTransferLimits`, `getSbpDefaultBank`, `getLanguageSettings` | `UNAVAILABLE` (пустого значения нет, G-6) | Демо-данные из JSON | Запрос к банку |
 | Остальные действия | `UNAVAILABLE` | Имитация по демо-правилам | Запрос к банку |
 
@@ -633,19 +638,19 @@ interface BankingAdapter {
 
 ## 10. Открытые вопросы контракта
 
-Открытые вопросы, кроме CQ-09, не меняют существующие сигнатуры: ответы могут только добавить поля или операции. Ответ на CQ-09 может изменить тип поля `AccountSummary.status`.
+Открытые вопросы, кроме CQ-06, не меняют существующие обязательные сигнатуры: ответы могут только добавить необязательное поле, операцию или поменять проверку. Ответ на CQ-06 может добавить обязательное поле в `confirmTransfer`.
 
 | № | Вопрос | Статус | Блокирует v1? | Сейчас в контракте |
 |---|---|---|---|---|
-| CQ-01 | Обязательны ли квартира в адресе и комментарий к переводу? | NEEDS_DECISION | Нет: меняется только проверка | Поля есть, обязательность не задана |
+| CQ-01 | Обязательны ли квартира в адресе и комментарий к переводу? | NEEDS_DECISION | Нет: меняется только проверка. Типы зафиксированы: `apartment: string` (пустая строка — квартиры нет), `comment?: string` | Поля есть, обязательность не задана |
 | ~~CQ-02~~ | ~~Нужны ли данные счёта в v1~~ | Решено — D-21 | — | `getAccounts`; ACC-01 по-прежнему SOURCE_REQUIRED |
 | ~~CQ-03~~ | ~~Сколько счетов у клиента~~ | Решено — D-22: может быть несколько | — | `getAccounts` возвращает список |
-| CQ-04 | Что дальше, если перевод «в обработке» (`pending`)? Уточнения статуса в UI нет | NEEDS_DECISION | Нет: ответ может только добавить операцию | `pending` — конечный ответ для PST-02 |
+| CQ-04 | Что дальше, если перевод «в обработке» (`pending`)? Уточнения статуса в UI нет | NEEDS_DECISION | Нет: ответ может только добавить операцию; перевод уже можно назвать по `clientRequestId` | `pending` — конечный ответ для PST-02 |
 | CQ-05 | Можно ли снять настройку «банк по умолчанию»? | NEEDS_DECISION | Нет: ответ может только добавить операцию | Только `setSbpDefaultBank` |
-| CQ-06 | Нужно ли ФИО получателя при переводе по реквизитам? В UI его нет | NEEDS_DECISION | Нет: ответ может только добавить поле | Не передаётся |
+| CQ-06 | Нужно ли ФИО получателя при переводе по реквизитам? В UI его нет | NEEDS_DECISION | **Да, `confirmTransfer`:** если ФИО обязательно, в `recipient` для `bankAccount` добавится обязательное поле, а на PAY-06 — поле ввода | Не передаётся |
 | ~~CQ-07~~ | ~~Чьи операции показывает мини-выписка при нескольких счетах~~ | Решено — D-23: одного конкретного счёта | — | `getRecentTransactions` требует `accountId` |
 | ~~CQ-08~~ | ~~С какого счёта списывается перевод~~ | Решено — D-24: с одного конкретного счёта, поле обязательно | — | `TransferRequest.sourceAccountId` |
-| CQ-09 | Значения `AccountSummary.status`: `active` и `blocked` взяты из состояний `AccountCard`, помеченных `[A]`. Утвердить набор значений и что значит `blocked` (например, можно ли с такого счёта переводить) | NEEDS_DECISION | Остальные поля `getAccounts` — нет. Тип `status` может измениться после ответа | Поле есть, значения из предложения `[A]` |
+| ~~CQ-09~~ | ~~Значения `AccountSummary.status`~~ | Решено — D-25: `active` \| `blocked`; `blocked` нельзя указать счётом списания | — | `AccountStatus`; `STATE_CONFLICT` в `confirmTransfer` |
 | Q-17 | Какие языки интерфейса | OPEN | Нет | Структура есть, значения не заданы |
 
 Вопросы Q-10, Q-11 и Q-16 из UI-спецификации остаются открытыми: Q-10 и Q-16 контракт не затрагивают, Q-11 исключён целиком.
@@ -661,4 +666,6 @@ interface BankingAdapter {
 - `getAccountSummary` переведена в `NEEDS_DECISION`.
 - **Поправка после D-21 и D-22:** `getAccountSummary(): AccountSummary | null` заменена на `getAccounts(): AccountSummary[]`; добавлено техническое поле `AccountSummary.id`; операция стала `STABLE`. Вопросы CQ-02 и CQ-03 закрыты, добавлены CQ-07 и CQ-08. Сигнатура `getRecentTransactions` не менялась.
 - **Поправка после D-23 и D-24:** `getRecentTransactions` получила обязательный `accountId`; в `TransferRequest` добавлено обязательное `sourceAccountId`. Оба поля — `AccountSummary.id`, другого идентификатора счёта нет. Вопросы CQ-07 и CQ-08 закрыты. Добавлен CQ-09: значения `AccountSummary.status` пришли из предложения `[A]`, а `[A]` в контракт не попадает, поэтому `getAccounts` переведена в `NEEDS_DECISION · CQ-09`.
+- **Поправка после D-25:** утверждён `AccountStatus = "active" | "blocked"`; единственное следствие `blocked` — нельзя указать счётом списания, `confirmTransfer` отвечает `STATE_CONFLICT`. `getAccounts` снова `STABLE`, CQ-09 закрыт.
+- **Аудит перед заморозкой:** у CQ-06 исправлена оценка — ответ может добавить обязательное поле, поэтому `confirmTransfer` — `NEEDS_DECISION · CQ-06`. Для CQ-01 зафиксированы типы полей, чтобы ответ менял только проверку.
 - Названия операций не менялись.
