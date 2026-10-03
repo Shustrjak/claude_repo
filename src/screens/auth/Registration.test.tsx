@@ -197,6 +197,10 @@ describe("Registration: new customer (AUTH-01 → ACC-07 → AUTH-02 … AUTH-07
     await typeCode(user, CODE);
     await expectHome(router);
     expect(await banking.getAccounts()).toEqual({ ok: true, data: [] }); // D-18: no product opened
+    // D-47: no accounts is a valid home — the empty state, no card, no automatic ACC-07.
+    expect(await screen.findByText("Счетов пока нет")).toBeTruthy();
+    expect(screen.queryAllByRole("article")).toHaveLength(0);
+    expect(router.state.location.pathname).toBe("/home");
   });
 });
 

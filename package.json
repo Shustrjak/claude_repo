@@ -28,6 +28,7 @@
     "vitest": "5.0.3"
   },
   "dependencies": {
+    "@alfalab/core-components-amount": "5.1.1",
     "@alfalab/core-components-button": "13.2.4",
     "@alfalab/core-components-checkbox": "6.3.2",
     "@alfalab/core-components-code-input": "5.1.5",
@@ -40,6 +41,7 @@
     "@alfalab/core-components-pure-cell": "6.1.0",
     "@alfalab/core-components-radio": "6.1.2",
     "@alfalab/core-components-spinner": "6.0.9",
+    "@alfalab/core-components-status": "5.1.0",
     "@alfalab/core-components-switch": "6.2.3",
     "@alfalab/core-components-system-message": "4.0.10",
     "@alfalab/core-components-tab-bar": "4.0.14",
