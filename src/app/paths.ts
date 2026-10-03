@@ -4,6 +4,7 @@ export const paths = {
   home: "/home",
   openAccount: "/open-account",
   settings: "/settings",
+  changeMpin: "/settings/mpin",
   biometricSettings: "/settings/biometric",
   register: {
     phone: "/register/phone",

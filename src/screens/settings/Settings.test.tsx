@@ -51,10 +51,9 @@ describe("SET-01 Settings", () => {
     expect(router.state.location.pathname).toBe("/login");
   });
 
-  it("shows the rows of its composition; SET-02 and SET-04 are not implemented yet", () => {
+  it("shows the rows of its composition; SET-04 waits for Q-17", () => {
     renderApp(stubBankingAdapter().adapter, { path: "/settings", authenticated: true });
-    expect(screen.getByText("Настройки")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Сменить MPIN" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Сменить MPIN" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: "Язык" }).hasAttribute("disabled")).toBe(true);
     expect(screen.getByRole("button", { name: "Вход по биометрии" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: "Выйти" }).hasAttribute("disabled")).toBe(false);
@@ -75,16 +74,25 @@ describe("SET-01 Settings", () => {
     expect(otherCalls).toEqual([]);
   });
 
-  it("Q-39 interim: a failed logout keeps the session and says so", async () => {
+  it.each([
+    ["an error result", async (): Promise<Result<void>> => fail("UNAVAILABLE")],
+    [
+      "a thrown error",
+      async (): Promise<Result<void>> => {
+        throw new Error("network");
+      },
+    ],
+  ])("D-44: closes the app session even when logout returns %s", async (_label, logoutImpl) => {
     const user = userEvent.setup();
-    const { adapter, logout } = bankingWithLogout(async () => fail("UNAVAILABLE"));
+    const { adapter, logout } = bankingWithLogout(logoutImpl);
     const { router } = renderApp(adapter, { path: "/settings", authenticated: true });
     await user.click(screen.getByRole("button", { name: "Выйти" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("Не удалось выйти");
+    await screen.findByRole("group", { name: "Введите MPIN" });
     expect(logout).toHaveBeenCalledOnce();
-    expect(router.state.location.pathname).toBe("/settings");
+    expect(router.state.location.pathname).toBe("/login");
+    expect(screen.queryByText(/Не удалось выйти/)).toBeNull();
     await act(() => router.navigate("/home"));
-    expect(router.state.location.pathname).toBe("/home");
+    expect(router.state.location.pathname).toBe("/login");
   });
 
   it("logs out once even when «Выйти» is pressed twice", async () => {

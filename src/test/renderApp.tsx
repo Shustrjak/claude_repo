@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { BankingAdapter } from "../adapters/banking/BankingAdapter";
 import type { DeviceCapabilityAdapter } from "../adapters/device/DeviceCapabilityAdapter";
@@ -49,4 +49,10 @@ export function renderApp(
     </BankingAdapterProvider>,
   );
   return { ...view, router, preferenceStorage: storage };
+}
+
+/** The current screen's title, from its header: titles can repeat elsewhere (e.g. bottom navigation). */
+export function findScreenTitle(title: string): Promise<HTMLElement> {
+  // Re-query the header each time: the previous screen's header disappears on navigation.
+  return waitFor(() => within(screen.getByRole("banner")).getByText(title));
 }

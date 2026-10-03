@@ -8,7 +8,7 @@ import type { PersonalDetails } from "../../adapters/banking/types";
 import { DemoDeviceAdapter } from "../../adapters/device/DemoDeviceAdapter";
 import type { DeviceCapabilityAdapter, SimBinding, SimCard } from "../../adapters/device/DeviceCapabilityAdapter";
 import { APP_PREFERENCES_KEY } from "../../app/appPreferencesStorage";
-import { memoryPreferenceStorage, renderApp } from "../../test/renderApp";
+import { findScreenTitle, memoryPreferenceStorage, renderApp } from "../../test/renderApp";
 
 type User = ReturnType<typeof userEvent.setup>;
 const NOW = () => new Date("2026-10-01T12:00:00Z");
@@ -92,7 +92,7 @@ async function setMpinTwice(user: User, digits = "4321", { biometric = false } =
 }
 
 async function expectHome(router: { state: { location: { pathname: string } } }) {
-  await screen.findByText("Главная");
+  await findScreenTitle("Главная");
   expect(router.state.location.pathname).toBe("/home");
 }
 

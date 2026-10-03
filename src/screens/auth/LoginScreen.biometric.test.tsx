@@ -12,7 +12,7 @@ import type { LoginRequest, Result } from "../../adapters/banking/types";
 import { DemoDeviceAdapter } from "../../adapters/device/DemoDeviceAdapter";
 import type { BiometricVerification, DeviceCapabilityAdapter } from "../../adapters/device/DeviceCapabilityAdapter";
 import { NullDeviceAdapter } from "../../adapters/device/NullDeviceAdapter";
-import { renderApp } from "../../test/renderApp";
+import { findScreenTitle, renderApp } from "../../test/renderApp";
 
 const BIOMETRIC = { name: "Войти по биометрии" };
 
@@ -35,7 +35,7 @@ function scriptedDevice(verify: () => Promise<BiometricVerification>) {
 }
 
 async function expectHome(router: { state: { location: { pathname: string } } }) {
-  await screen.findByText("Главная");
+  await findScreenTitle("Главная");
   expect(router.state.location.pathname).toBe("/home");
 }
 

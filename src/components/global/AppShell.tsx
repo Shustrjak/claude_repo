@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import styles from "./AppShell.module.css";
 
 type Props = {
-  /** `auth` has no bottom navigation; `main` will get BottomNavigation with its first routes. */
+  /** `auth` before login, `main` after. The bottom navigation comes from the route layout (D-43). */
   variant: "auth" | "main";
   header: ReactNode;
   children?: ReactNode;

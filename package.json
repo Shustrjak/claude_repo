@@ -42,6 +42,7 @@
     "@alfalab/core-components-spinner": "6.0.9",
     "@alfalab/core-components-switch": "6.2.3",
     "@alfalab/core-components-system-message": "4.0.10",
+    "@alfalab/core-components-tab-bar": "4.0.14",
     "@alfalab/core-components-typography": "6.0.13",
     "@alfalab/core-components-vars": "11.4.0",
     "@alfalab/icons-glyph": "2.293.0",

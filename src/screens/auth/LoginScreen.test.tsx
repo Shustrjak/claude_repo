@@ -9,7 +9,7 @@ import { NullAdapter } from "../../adapters/banking/NullAdapter";
 import { fail, ok } from "../../adapters/banking/result";
 import { stubBankingAdapter } from "../../adapters/banking/testing/fixtures";
 import type { LoginRequest, Result } from "../../adapters/banking/types";
-import { renderApp } from "../../test/renderApp";
+import { findScreenTitle, renderApp } from "../../test/renderApp";
 
 /** A test double of the interface: login is scripted, every other operation records a call. */
 function adapterWithLogin(login: (req: LoginRequest) => Promise<Result<void>>) {
@@ -21,7 +21,7 @@ function adapterWithLogin(login: (req: LoginRequest) => Promise<Result<void>>) {
 
 /** Home actually rendered (not just a transient URL the guard then redirects away from). */
 async function expectHome(router: { state: { location: { pathname: string } } }) {
-  await screen.findByText("Главная");
+  await findScreenTitle("Главная");
   expect(router.state.location.pathname).toBe("/home");
 }
 
@@ -163,10 +163,10 @@ describe("Route guard", () => {
     expect(router.state.location.pathname).toBe("/login");
   });
 
-  it("lets an authenticated session open Home", () => {
+  it("lets an authenticated session open Home", async () => {
     const { router } = renderApp(stubBankingAdapter().adapter, { path: "/home", authenticated: true });
     expect(router.state.location.pathname).toBe("/home");
-    expect(screen.getByText("Главная")).toBeTruthy();
+    expect(await findScreenTitle("Главная")).toBeTruthy();
   });
 
   it("sends unknown paths to login", () => {

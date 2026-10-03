@@ -10,10 +10,12 @@ import { SelectSimScreen } from "../screens/auth/SelectSimScreen";
 import { SetMpinScreen } from "../screens/auth/SetMpinScreen";
 import { HomeScreen } from "../screens/home/HomeScreen";
 import { BiometricSettingsScreen } from "../screens/settings/BiometricSettingsScreen";
+import { ChangeMpinScreen } from "../screens/settings/ChangeMpinScreen";
 import { SettingsScreen } from "../screens/settings/SettingsScreen";
 import { paths } from "./paths";
 import { RegistrationFlowLayout } from "./registration/RegistrationFlowLayout";
 import { RequireRegistrationStep } from "./registration/RequireRegistrationStep";
+import { MainNavigationLayout } from "./MainNavigationLayout";
 import { RequireSession } from "./RequireSession";
 
 const step = (name: Parameters<typeof RequireRegistrationStep>[0]["step"], path: string, element: ReactNode): RouteObject => ({
@@ -39,8 +41,15 @@ export const routes: RouteObject[] = [
   {
     element: <RequireSession />,
     children: [
-      { path: paths.home, element: <HomeScreen /> },
-      { path: paths.settings, element: <SettingsScreen /> },
+      // Top-level destinations get the bottom navigation; nested screens use "back" (D-43).
+      {
+        element: <MainNavigationLayout />,
+        children: [
+          { path: paths.home, element: <HomeScreen /> },
+          { path: paths.settings, element: <SettingsScreen /> },
+        ],
+      },
+      { path: paths.changeMpin, element: <ChangeMpinScreen /> },
       { path: paths.biometricSettings, element: <BiometricSettingsScreen /> },
     ],
   },

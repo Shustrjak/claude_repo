@@ -73,7 +73,7 @@
 
 ## Слой B — семантические компоненты
 
-**В коде** [D-30, D-39, D-42]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `ListRow` (`link`, `toggle`, `danger`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад») — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
+**В коде** [D-30, D-39, D-42, D-46]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `ListRow` (`link`, `toggle`, `danger`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад»), `BottomNavigation` — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
 
 Подробно — в [SEMANTIC_COMPONENTS.md](SEMANTIC_COMPONENTS.md).
 
@@ -135,7 +135,7 @@
 | Компонент | Экраны | Кол-во | Флоу |
 |---|---|---|---|
 | `AppShell`, `AppHeader` | Все подтверждённые экраны | 29 + PST | Все |
-| `BottomNavigation` | В составе `AppShell(main)` [A]. На каких экранах показывается — UNKNOWN | — | G, H |
+| `BottomNavigation` | HOME-01, SET-01 — главные разделы после входа [D-43] | 2 | E, G, H |
 | `ActionButton` | AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, PAY-04, PAY-06, PST-01, PST-02, PST-03; ACC-07, SBP-03, SET-02 [A] | 13 | A, B, C, D, E, F |
 | `ListRow` | AUTH-01, AUTH-06, HOME-04, ACC-07, SBP-01, SET-01, SET-03; HOME-01, SBP-03 [A] | 9 | A, B, D, E, F, G |
 | `AsyncContent` | HOME-01, ACC-02 | 2 | G |
