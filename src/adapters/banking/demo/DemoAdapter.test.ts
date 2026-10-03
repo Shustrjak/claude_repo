@@ -69,6 +69,24 @@ describe("DemoAdapter seed", () => {
   it("rejects a wrong MPIN at login", async () => {
     expect(await demo().login({ method: "mpin", mpin: "0000" })).toEqual({ ok: false, error: { code: "MPIN_INVALID" } });
   });
+
+  it("rejects an untyped login method as malformed input (G-10)", async () => {
+    expect(await demo().login(malformed({ method: "password" }))).toEqual({
+      ok: false,
+      error: { code: "VALIDATION_FAILED", fields: ["method"] },
+    });
+  });
+
+  it("rejects registration steps called out of order with STATE_CONFLICT (G-10)", async () => {
+    const adapter = demo();
+    expect(await adapter.sendEmailCode({ email: "anna@example.com" })).toEqual({
+      ok: false,
+      error: { code: "STATE_CONFLICT" },
+    });
+    await adapter.startRegistration({ phone: "+79990000077", onboardingContext: "new_customer" });
+    expect(await adapter.setMpin({ mpin: "4321" })).toEqual({ ok: false, error: { code: "STATE_CONFLICT" } });
+    expect(await adapter.requestOtp({ purpose: "onboarding" })).toEqual({ ok: false, error: { code: "STATE_CONFLICT" } });
+  });
 });
 
 describe("DemoAdapter transactions", () => {

@@ -1,4 +1,5 @@
 import type { BankingAdapter } from "../BankingAdapter";
+import { fail } from "../result";
 import type { ErrorCode, PersonalDetails, Result, TransferRequest } from "../types";
 
 /** All operations of the contract. `satisfies` fails to compile if one is missing or extra. */
@@ -130,4 +131,40 @@ export async function callEveryOperation(
     results.push([name, await call()]);
   }
   return results;
+}
+
+/**
+ * A typed BankingAdapter that is neither DemoAdapter nor NullAdapter: every operation answers
+ * UNAVAILABLE and records its name, so tests can prove injection and that nothing was called.
+ */
+export function stubBankingAdapter(): { adapter: BankingAdapter; calls: (keyof BankingAdapter)[] } {
+  const calls: (keyof BankingAdapter)[] = [];
+  const method =
+    (name: keyof BankingAdapter) =>
+    async <T>(): Promise<Result<T>> => {
+      calls.push(name);
+      return fail("UNAVAILABLE");
+    };
+  const adapter: BankingAdapter = {
+    login: method("login"),
+    logout: method("logout"),
+    startRegistration: method("startRegistration"),
+    submitPersonalDetails: method("submitPersonalDetails"),
+    requestOtp: method("requestOtp"),
+    verifyOtp: method("verifyOtp"),
+    sendEmailCode: method("sendEmailCode"),
+    verifyEmailCode: method("verifyEmailCode"),
+    setMpin: method("setMpin"),
+    changeMpin: method("changeMpin"),
+    getAccounts: method("getAccounts"),
+    getRecentTransactions: method("getRecentTransactions"),
+    getTransferLimits: method("getTransferLimits"),
+    confirmTransfer: method("confirmTransfer"),
+    findRecipientBanks: method("findRecipientBanks"),
+    getSbpDefaultBank: method("getSbpDefaultBank"),
+    setSbpDefaultBank: method("setSbpDefaultBank"),
+    getLanguageSettings: method("getLanguageSettings"),
+    setLanguage: method("setLanguage"),
+  };
+  return { adapter, calls };
 }

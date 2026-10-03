@@ -27,7 +27,7 @@ DemoAdapter | NullAdapter | FutureRealBankAdapter (в задаче — RealBankA
 | Метка | Значение |
 |---|---|
 | `[SOURCE]` | Явный источник: схема R38 ([`refs/R38-user-flow.jpg`](../../refs/R38-user-flow.jpg)) |
-| `[DECISION]` | Утверждённое решение D-01…D-27 |
+| `[DECISION]` | Утверждённое решение D-01…D-29 |
 | `[SCREEN]` | Утверждённый экран, его композиция или вход семантического компонента без метки `[A]` |
 | `[FLOW]` | Утверждённый пользовательский флоу |
 | `[TECHNICAL]` | Строго необходимое техническое поле. Обоснование указано всегда; продуктовую функциональность так не вводим |
@@ -67,6 +67,7 @@ DemoAdapter | NullAdapter | FutureRealBankAdapter (в задаче — RealBankA
 | G-7 | Операции названы по предметной области, не по ID экранов | `[TECHNICAL]` контракт не знает экранов |
 | G-8 | Имена полей в camelCase: `onboardingContext` = `onboarding_context` из D-18 | `[TECHNICAL]` единый стиль |
 | G-9 | Все операции асинхронные и возвращают `Promise<Result<T>>` | `[TECHNICAL]` адаптер может работать через сеть |
+| G-10 | Список ошибок у операции перечисляет её типичные случаи и не отменяет общие правила раздела 4. Любая операция может ответить: `STATE_CONFLICT` — если вызвана не на своём шаге флоу; `VALIDATION_FAILED` с `fields` — если вход не прошёл проверку адаптера во время выполнения; `UNKNOWN` — при необработанной ошибке. Недопустимые значения перечислений и дискриминантов (`method`, `purpose`) типизированный вызов передать не может — это ошибка компиляции. Но адаптер — окончательный валидатор (G-2) и непроверенный ввод во время выполнения отклоняет как `VALIDATION_FAILED`. Отдельной схемы проверки контракт не требует | `[DECISION]` D-29 |
 
 ---
 
@@ -102,7 +103,7 @@ type CodeDelivery = { destinationMasked: string; codeLength: number; resendAfter
 | `UNKNOWN` | Прочий сбой | Любая необработанная ошибка | `StatusMessage(error)`, `OperationStatus(failure)` | `[TECHNICAL]` ошибка без отдельной обработки |
 | `VALIDATION_FAILED` | Проверка данных | Поля не прошли проверку адаптера | Ошибка у поля (`fields`) | `[TECHNICAL]` форма проверяет только формат, окончательная проверка — у адаптера (G-2) |
 | `SESSION_EXPIRED` | Аутентификация | Сессии нет или она закончилась | Переход на AUTH-01 | `[DECISION]` D-08: без сессии — AUTH-01 |
-| `STATE_CONFLICT` | Нарушен порядок шагов или состояние не позволяет операцию | Вход без регистрации на этом экземпляре приложения; `submitPersonalDetails` без подтверждённой почты; `changeMpin` без подтверждённого OTP; поля карты не соответствуют `onboardingContext`; счёт списания заблокирован (`fields: ["sourceAccountId"]`) | `StatusMessage(error)`; для перевода — PST-02 | `[TECHNICAL]` защита правил D-10, D-18, D-19 и G-1; `[DECISION]` D-25 |
+| `STATE_CONFLICT` | Нарушен порядок шагов или состояние не позволяет операцию | Вход без регистрации на этом экземпляре приложения; `submitPersonalDetails` без подтверждённой почты; `changeMpin` без подтверждённого OTP; поля карты не соответствуют `onboardingContext`; шаг регистрации вызван не по порядку флоу B (G-10); счёт списания заблокирован (`fields: ["sourceAccountId"]`) | `StatusMessage(error)`; для перевода — PST-02 | `[TECHNICAL]` защита правил D-10, D-18, D-19 и G-1; `[DECISION]` D-25 |
 | `MPIN_INVALID` | Аутентификация | Неверный MPIN | AUTH-01, PST-01 | `[SCREEN]` `MPINInput.error`; G-2 «верен ли MPIN» |
 | `CODE_INVALID` | Проверка кода | Неверный или просроченный OTP или код из письма | AUTH-07 (Failure → AUTH-03), SET-02, AUTH-05 | `[SOURCE]` AUTH-07 Failure; `[DECISION]` D-19 «код неверный» |
 | `AGE_RESTRICTION` | Проверка данных | Возраст меньше 18 лет | AUTH-05 | `[DECISION]` D-15 «дата рождения (18+)» |
@@ -237,7 +238,7 @@ requestOtp(req: { purpose: OtpPurpose }): Promise<Result<CodeDelivery>>
 
 - **Зачем:** `[SOURCE]` N10 «Authenticate through OTP»; `[FLOW]` E — смена MPIN.
 - Телефон адаптер знает сам (G-1). Повторный вызов = «Отправить ещё раз».
-- Ошибки: `SESSION_EXPIRED` (для `change_mpin`), `UNAVAILABLE`, `UNKNOWN`.
+- Ошибки: `SESSION_EXPIRED` (для `change_mpin`), `STATE_CONFLICT` (для `onboarding` — MPIN ещё не установлен), `UNAVAILABLE`, `UNKNOWN`.
 
 #### `verifyOtp` — проверить OTP · `STABLE`
 
@@ -270,7 +271,7 @@ sendEmailCode(req: { email: string }): Promise<Result<CodeDelivery>>
 | ответ | `CodeDelivery` | — | `[SCREEN]` `OTPVerification` на AUTH-05 |
 
 - Повторный вызов = повторная отправка.
-- Ошибки: `VALIDATION_FAILED`, `UNAVAILABLE`, `UNKNOWN`.
+- Ошибки: `VALIDATION_FAILED`, `STATE_CONFLICT` (регистрация не начата), `UNAVAILABLE`, `UNKNOWN`.
 
 #### `verifyEmailCode` — проверить код из письма · `STABLE`
 
@@ -300,7 +301,7 @@ setMpin(req: { mpin: string }): Promise<Result<void>>
 
 - Совпадение с повтором проверяет форма экрана, в контракт уходит одно значение.
 - Включение входа по биометрии на AUTH-06 — граница устройства (D-14).
-- Ошибки: `VALIDATION_FAILED`, `UNAVAILABLE`, `UNKNOWN`.
+- Ошибки: `VALIDATION_FAILED`, `STATE_CONFLICT` (данные AUTH-05 ещё не отправлены), `UNAVAILABLE`, `UNKNOWN`.
 
 #### `changeMpin` — сменить MPIN · `STABLE`
 
@@ -664,7 +665,7 @@ interface BankingAdapter {
 | ~~CQ-07~~ | ~~Чьи операции показывает мини-выписка при нескольких счетах~~ | Решено — D-23: одного конкретного счёта | — | `getRecentTransactions` требует `accountId` |
 | ~~CQ-08~~ | ~~С какого счёта списывается перевод~~ | Решено — D-24: с одного конкретного счёта, поле обязательно | — | `TransferRequest.sourceAccountId` |
 | ~~CQ-09~~ | ~~Значения `AccountSummary.status`~~ | Решено — D-25: `active` \| `blocked`; `blocked` нельзя указать счётом списания | — | `AccountStatus`; `STATE_CONFLICT` в `confirmTransfer` |
-| CQ-10 | Вызов не по порядку флоу B: `sendEmailCode` до `startRegistration`, `setMpin` до `submitPersonalDetails`, `requestOtp({ purpose: "onboarding" })` до `setMpin`. В списках ошибок этих операций нет `STATE_CONFLICT`, хотя по разделу 4 это его случай («нарушен порядок шагов»). `DemoAdapter` сейчас отвечает `STATE_CONFLICT`. Дописать его в списки ошибок? | NEEDS_DECISION | Нет: `STATE_CONFLICT` уже есть в `ErrorCode`, меняется только документация | `DemoAdapter` отвечает `STATE_CONFLICT` |
+| ~~CQ-10~~ | ~~`STATE_CONFLICT` в списках ошибок операций регистрации~~ | Решено — D-29: общее правило G-10; `STATE_CONFLICT` дописан к `sendEmailCode`, `setMpin`, `requestOtp` | — | Сигнатуры не менялись |
 | Q-17 | Какие языки интерфейса | OPEN | Нет | Структура есть, значения не заданы |
 
 Вопросы Q-10, Q-11 и Q-16 из UI-спецификации остаются открытыми: Q-10 и Q-16 контракт не затрагивают, Q-11 исключён целиком.
@@ -683,4 +684,5 @@ interface BankingAdapter {
 - **Поправка после D-25:** утверждён `AccountStatus = "active" | "blocked"`; единственное следствие `blocked` — нельзя указать счётом списания, `confirmTransfer` отвечает `STATE_CONFLICT`. `getAccounts` снова `STABLE`, CQ-09 закрыт.
 - **Аудит перед заморозкой:** у CQ-06 исправлена оценка — ответ может добавить обязательное поле, поэтому `confirmTransfer` — `NEEDS_DECISION · CQ-06`. Для CQ-01 зафиксированы типы полей, чтобы ответ менял только проверку.
 - **Поправка после D-26:** в вариант `bankAccount` поля `recipient` добавлено обязательное `recipientName: string`; на PAY-06 — поле ввода. CQ-06 закрыт, `confirmTransfer` — `STABLE · CQ-01, CQ-04`. Добавлена таблица условных полей перевода. Для вложенных полей в `fields` введена запись через точку. Обязательные сигнатуры всех 19 операций заморожены.
+- **Поправка после D-29 (CQ-10):** добавлено общее правило G-10 об ошибках во время выполнения; `STATE_CONFLICT` дописан в списки ошибок `sendEmailCode`, `setMpin` и `requestOtp` (назначение `onboarding`). Сигнатуры не менялись.
 - Названия операций не менялись.

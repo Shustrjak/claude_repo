@@ -96,7 +96,7 @@ export class DemoAdapter implements BankingAdapter {
       }
       const request: unknown = req;
       if (!isRecord(request) || (request.method !== "biometric" && request.method !== "mpin")) {
-        return fail("UNKNOWN");
+        return fail("VALIDATION_FAILED", ["method"]); // G-10: malformed runtime input
       }
       if (request.method === "mpin" && !(isMpin(request.mpin) && hashMpin(request.mpin) === customer.mpinHash)) {
         return fail("MPIN_INVALID");
