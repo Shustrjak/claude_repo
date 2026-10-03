@@ -6,7 +6,7 @@ import { DemoAdapter } from "../../adapters/banking/demo/DemoAdapter";
 import { createMemoryStorage, type DemoStorage } from "../../adapters/banking/demo/storage";
 import type { PersonalDetails } from "../../adapters/banking/types";
 import { DemoDeviceAdapter } from "../../adapters/device/DemoDeviceAdapter";
-import type { DeviceCapabilityAdapter, SimBinding } from "../../adapters/device/DeviceCapabilityAdapter";
+import type { DeviceCapabilityAdapter, SimBinding, SimCard } from "../../adapters/device/DeviceCapabilityAdapter";
 import { APP_PREFERENCES_KEY } from "../../app/appPreferencesStorage";
 import { memoryPreferenceStorage, renderApp } from "../../test/renderApp";
 
@@ -261,11 +261,32 @@ describe("AUTH-03 / AUTH-04: SIM", () => {
     expect(bindSim.mock.calls).toEqual([["sim-1"], ["sim-2"]]);
   });
 
-  it("cannot continue without a SIM (Q-36 stays open)", async () => {
+  it("D-40: without a SIM stays on AUTH-03, searches again on request and then continues", async () => {
     const user = userEvent.setup();
-    await reachSim(user, new DemoDeviceAdapter({ simCount: 0 }));
+    const lists: SimCard[][] = [[], [], [{ id: "sim-1", slot: 1 }]];
+    const getSimCards = vi.fn(async () => lists.shift() ?? []);
+    const device: DeviceCapabilityAdapter = { ...simDevice([]).device, getSimCards };
+    const banking = demoBanking();
+    const start = vi.spyOn(banking, "startRegistration");
+    const { router } = renderApp(banking, { path: "/login", device });
+    await user.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
+    await enterPhone(user);
+
     expect(await screen.findByText("SIM-карта не найдена")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Далее" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Повторить поиск" }));
+    await waitFor(() => expect(getSimCards).toHaveBeenCalledTimes(2));
+    expect(screen.getByText("SIM-карта не найдена")).toBeTruthy();
+    expect(router.state.location.pathname).toBe("/register/sim");
+
+    const retry = screen.getByRole("button", { name: "Повторить поиск" });
+    await waitFor(() => expect(retry.hasAttribute("disabled")).toBe(false));
+    await user.click(retry);
+    await chooseSim(user, "SIM 1");
+    await confirmBinding(user);
+    expect(getSimCards).toHaveBeenCalledTimes(3);
+    expect(start).toHaveBeenCalledOnce(); // registration was not restarted
+    expect(router.state.location.pathname).toBe("/register/details");
   });
 });
 
@@ -381,29 +402,60 @@ describe("AUTH-06: MPIN and biometric preference", () => {
 });
 
 describe("AUTH-07: onboarding OTP", () => {
-  it("a wrong code goes back to SIM selection, as on the scheme (Failure → AUTH-03)", async () => {
+  it("D-41: a wrong code → AUTH-03 → AUTH-04 → straight back to AUTH-07; nothing else is repeated", async () => {
     const user = userEvent.setup();
     const banking = demoBanking();
-    const { router } = renderApp(banking, { path: "/login", device: new DemoDeviceAdapter() });
+    const calls = {
+      start: vi.spyOn(banking, "startRegistration"),
+      details: vi.spyOn(banking, "submitPersonalDetails"),
+      mpin: vi.spyOn(banking, "setMpin"),
+      requestOtp: vi.spyOn(banking, "requestOtp"),
+      verifyOtp: vi.spyOn(banking, "verifyOtp"),
+    };
+    const bindSim = vi.fn(async () => "bound" as const);
+    const device: DeviceCapabilityAdapter = {
+      isBiometricAvailable: async () => true,
+      verifyBiometric: async () => "verified",
+      getSimCards: async () => [
+        { id: "sim-1", slot: 1 },
+        { id: "sim-2", slot: 2 },
+      ],
+      bindSim,
+    };
+    const { router, preferenceStorage } = renderApp(banking, { path: "/login", device });
     await user.click(screen.getByRole("button", { name: "Открыть счёт" }));
     await next(user);
     await enterPhone(user);
-    await chooseSim(user);
+    await chooseSim(user, "SIM 1");
     await confirmBinding(user);
     await fillDetails(user);
     await next(user);
-    await setMpinTwice(user);
+    await setMpinTwice(user, "4321", { biometric: true });
     await typeCode(user, "000000");
+
     await screen.findByText("Код не подошёл");
     expect(router.state.location.pathname).toBe("/register/sim");
-    // The steps are walked again, literally as on the scheme (Q-37 stays open), and then succeed.
+    expect(preferenceStorage.getItem(APP_PREFERENCES_KEY)).toBeNull(); // the choice is still pending
     await chooseSim(user, "SIM 2");
     await confirmBinding(user);
-    await fillDetails(user);
-    await next(user);
-    await setMpinTwice(user);
+    expect(router.state.location.pathname).toBe("/register/otp");
+    expect(bindSim.mock.calls).toEqual([["sim-1"], ["sim-2"]]);
+
+    await screen.findByText(/Код отправлен/);
     await typeCode(user, CODE);
     await expectHome(router);
+    expect(calls.start).toHaveBeenCalledOnce();
+    expect(calls.details).toHaveBeenCalledOnce();
+    expect(calls.mpin).toHaveBeenCalledOnce();
+    expect(calls.requestOtp).toHaveBeenCalledTimes(2);
+    expect(calls.verifyOtp.mock.calls).toEqual([
+      [{ purpose: "onboarding", code: "000000" }],
+      [{ purpose: "onboarding", code: CODE }],
+    ]);
+    expect(JSON.parse(preferenceStorage.getItem(APP_PREFERENCES_KEY) ?? "null")).toEqual({
+      version: 1,
+      biometricLoginEnabled: true,
+    });
   });
 
   it("opens no session after a wrong code", async () => {

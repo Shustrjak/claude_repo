@@ -34,11 +34,10 @@ function RegistrationFlowProvider({ onboardingContext }: { onboardingContext: On
     detailsSubmitted: false,
     mpinSet: false,
     enableBiometricLogin: false,
-    otpFailed: false,
   });
-  const flow = useMemo<RegistrationFlow>(
+  // Actions only use the functional updater, so they stay the same across renders.
+  const actions = useMemo<Omit<RegistrationFlow, keyof RegistrationProgress>>(
     () => ({
-      ...progress,
       // Starting (again) on AUTH-02 resets later steps: the adapter starts a new registration too.
       markStarted: () =>
         setProgress((p) => ({
@@ -48,18 +47,17 @@ function RegistrationFlowProvider({ onboardingContext }: { onboardingContext: On
           simBound: false,
           detailsSubmitted: false,
           mpinSet: false,
-          otpFailed: false,
         })),
       selectSim: (simId) => setProgress((p) => ({ ...p, selectedSimId: simId, simBound: false })),
-      markSimBound: () => setProgress((p) => ({ ...p, simBound: true, otpFailed: false })),
+      markSimBound: () => setProgress((p) => ({ ...p, simBound: true })),
       markDetailsSubmitted: () => setProgress((p) => ({ ...p, detailsSubmitted: true })),
       markMpinSet: (enableBiometricLogin) => setProgress((p) => ({ ...p, mpinSet: true, enableBiometricLogin })),
-      // Only a mark: rebinding happens because AUTH-03 leads to AUTH-04 again. Resetting `simBound`
-      // here would let the still-mounted AUTH-07 guard bounce to login before the route changes.
-      reportOtpFailure: () => setProgress((p) => ({ ...p, otpFailed: true })),
+      // Called by AUTH-03 once AUTH-07 is gone, so AUTH-07's own guard never sees the reset.
+      requireSimRebind: () => setProgress((p) => (p.simBound ? { ...p, simBound: false } : p)),
     }),
-    [progress],
+    [],
   );
+  const flow = useMemo<RegistrationFlow>(() => ({ ...progress, ...actions }), [progress, actions]);
   return (
     <RegistrationFlowContext.Provider value={flow}>
       <Outlet />

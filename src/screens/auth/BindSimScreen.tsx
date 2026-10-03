@@ -51,7 +51,17 @@ export function BindSimScreen() {
         <OperationStatus
           status="success"
           title="SIM-карта привязана"
-          actions={<ActionButton action="next" onPress={() => navigate(paths.register.details, { replace: true })} />}
+          actions={
+            <ActionButton
+              action="next"
+              // D-41: after a wrong OTP, steps already done are not repeated.
+              onPress={() =>
+                navigate(flow.detailsSubmitted && flow.mpinSet ? paths.register.otp : paths.register.details, {
+                  replace: true,
+                })
+              }
+            />
+          }
         />
       )}
       {state === "failed" && (

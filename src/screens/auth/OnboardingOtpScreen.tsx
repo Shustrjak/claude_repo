@@ -12,11 +12,12 @@ import { ActionButton } from "../../components/semantic/ActionButton";
 import { OTPVerification } from "../../components/semantic/OTPVerification";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
 import { statusFor, type ScreenStatus } from "./registrationStatus";
+import type { SelectSimState } from "./SelectSimScreen";
 
 /**
  * AUTH-07 OTP Authentication: the onboarding OTP (D-10), not the email code. Success completes
  * registration and opens the session (contract: verifyOtp onboarding) → HOME-01; a wrong code
- * goes back to AUTH-03 as on the scheme (Failure → AUTH-03).
+ * goes back to AUTH-03 as on the scheme, and after rebinding the SIM straight back here (D-41).
  */
 export function OnboardingOtpScreen() {
   const adapter = useBankingAdapter();
@@ -69,8 +70,8 @@ export function OnboardingOtpScreen() {
         return;
       }
       if (result.error.code === "CODE_INVALID") {
-        flow.reportOtpFailure();
-        navigate(paths.register.sim, { replace: true });
+        const state: SelectSimState = { otpFailed: true };
+        navigate(paths.register.sim, { replace: true, state }); // Failure → AUTH-03 [S], D-41
         return;
       }
       setStatus(statusFor(result.error));

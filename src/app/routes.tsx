@@ -9,6 +9,8 @@ import { RegisterPhoneScreen } from "../screens/auth/RegisterPhoneScreen";
 import { SelectSimScreen } from "../screens/auth/SelectSimScreen";
 import { SetMpinScreen } from "../screens/auth/SetMpinScreen";
 import { HomeScreen } from "../screens/home/HomeScreen";
+import { BiometricSettingsScreen } from "../screens/settings/BiometricSettingsScreen";
+import { SettingsScreen } from "../screens/settings/SettingsScreen";
 import { paths } from "./paths";
 import { RegistrationFlowLayout } from "./registration/RegistrationFlowLayout";
 import { RequireRegistrationStep } from "./registration/RequireRegistrationStep";
@@ -19,7 +21,7 @@ const step = (name: Parameters<typeof RequireRegistrationStep>[0]["step"], path:
   children: [{ path, element }],
 });
 
-// Routes of the implemented flows only: login, open account, registration and the Home shell.
+// Routes of the implemented flows only: login, open account, registration, settings and the Home shell.
 export const routes: RouteObject[] = [
   { path: paths.login, element: <LoginScreen /> },
   { path: paths.openAccount, element: <OpenAccountScreen /> },
@@ -34,6 +36,13 @@ export const routes: RouteObject[] = [
       step("otp", paths.register.otp, <OnboardingOtpScreen />),
     ],
   },
-  { element: <RequireSession />, children: [{ path: paths.home, element: <HomeScreen /> }] },
+  {
+    element: <RequireSession />,
+    children: [
+      { path: paths.home, element: <HomeScreen /> },
+      { path: paths.settings, element: <SettingsScreen /> },
+      { path: paths.biometricSettings, element: <BiometricSettingsScreen /> },
+    ],
+  },
   { path: "*", element: <Navigate to={paths.login} replace /> },
 ];

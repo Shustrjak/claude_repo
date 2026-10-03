@@ -13,10 +13,8 @@ export type RegistrationProgress = {
   simBound: boolean;
   detailsSubmitted: boolean;
   mpinSet: boolean;
-  /** The AUTH-06 choice, applied to the app preference once registration completes. */
+  /** The AUTH-06 choice, kept pending until a successful OTP commits it (D-33, D-41). */
   enableBiometricLogin: boolean;
-  /** Set when an OTP failure sent the user back to AUTH-03 (flow B: Failure → AUTH-03). */
-  otpFailed: boolean;
 };
 
 export type RegistrationFlow = RegistrationProgress & {
@@ -25,7 +23,8 @@ export type RegistrationFlow = RegistrationProgress & {
   markSimBound: () => void;
   markDetailsSubmitted: () => void;
   markMpinSet: (enableBiometricLogin: boolean) => void;
-  reportOtpFailure: () => void;
+  /** After a wrong OTP: the SIM must be bound again; earlier steps stay done (D-41). */
+  requireSimRebind: () => void;
 };
 
 export const RegistrationFlowContext = createContext<RegistrationFlow | null>(null);

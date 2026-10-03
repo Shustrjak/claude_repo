@@ -73,7 +73,7 @@
 
 ## Слой B — семантические компоненты
 
-**В коде** [D-30, D-39]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `ListRow` (`link`, `toggle`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад») — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
+**В коде** [D-30, D-39, D-42]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `ListRow` (`link`, `toggle`, `danger`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад») — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
 
 Подробно — в [SEMANTIC_COMPONENTS.md](SEMANTIC_COMPONENTS.md).
 

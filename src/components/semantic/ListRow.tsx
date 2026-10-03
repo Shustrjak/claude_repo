@@ -2,7 +2,13 @@ import { Cell, Switch } from "../primitives";
 import styles from "./ListRow.module.css";
 
 type Props =
-  | { variant: "link"; title: string; subtitle?: string | undefined; disabled?: boolean; onPress?: () => void }
+  | {
+      variant: "link" | "danger";
+      title: string;
+      subtitle?: string | undefined;
+      disabled?: boolean;
+      onPress?: () => void;
+    }
   | {
       variant: "toggle";
       title: string;
@@ -14,7 +20,7 @@ type Props =
 
 const noop = () => undefined;
 
-/** A list row: `link` leads on, `toggle` switches a setting. `value` and `danger` arrive with their screens. */
+/** A list row: `link` leads on, `toggle` switches a setting, `danger` is a destructive action. `value` comes later. */
 export function ListRow(props: Props) {
   const { title, subtitle, disabled = false } = props;
   if (props.variant === "toggle") {
@@ -39,7 +45,11 @@ export function ListRow(props: Props) {
     >
       <Cell.Content>
         <Cell.Main>
-          <Cell.Text titleColor={disabled ? "disabled" : "primary"} view="component-primary" value={subtitle}>
+          <Cell.Text
+            titleColor={disabled ? "disabled" : props.variant === "danger" ? "negative" : "primary"}
+            view="component-primary"
+            value={subtitle}
+          >
             {title}
           </Cell.Text>
         </Cell.Main>
