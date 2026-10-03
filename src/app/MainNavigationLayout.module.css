@@ -1,4 +1,4 @@
 /* Room for the fixed bottom navigation. */
 .layout {
-  padding-bottom: 72px;
+  padding-bottom: 80px; /* the bar is up to ~74px with a two-line label */
 }

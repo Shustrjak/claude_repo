@@ -107,7 +107,7 @@ describe("HOME-01 accounts (D-47)", () => {
     expect(router.state.location.pathname).toBe("/home");
     expect(text(list)).not.toMatch(/основн|по умолчанию|предпочт|выбран/i);
     // Q-30 is open: no mini statement, so no transaction fetch; nothing else is asked either.
-    expect(otherCalls).toEqual([]);
+    expect(otherCalls).toEqual(["getLanguageSettings"]); // the app's own language load (D-49)
   });
 
   it("formats kopecks exactly: 123456 → 1 234,56 ₽ and 100 → 1 ₽", async () => {

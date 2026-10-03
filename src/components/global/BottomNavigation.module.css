@@ -12,3 +12,12 @@
   cursor: default;
   opacity: 0.4;
 }
+
+/* Long labels (e.g. «Функции СБП» at 320 px) wrap at spaces to a second line instead of being cut. */
+.label {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  max-width: 100%;
+  text-align: center;
+  word-break: normal;
+}

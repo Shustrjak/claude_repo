@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import type { CodeDelivery, PersonalDetails } from "../../adapters/banking/types";
+import type { CodeDelivery, ContractError, PersonalDetails } from "../../adapters/banking/types";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
 import { paths } from "../../app/paths";
 import { useRegistrationFlow } from "../../app/registration/RegistrationFlowContext";
@@ -10,28 +10,30 @@ import { Checkbox, Input, Typography } from "../../components/primitives";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { OTPVerification } from "../../components/semantic/OTPVerification";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { statusFor, type ScreenStatus } from "./registrationStatus";
+import { useMessages } from "../../localization/LocalizationContext";
+import type { Messages } from "../../localization/messages";
+import { statusFor } from "./registrationStatus";
 
-/** Text fields of AUTH-05 (D-15). Keys double as `PersonalDetails` field paths. */
+/** Text fields of AUTH-05 (D-15). Keys double as `PersonalDetails` field paths and label keys. */
 const FIELDS = [
-  ["firstName", "Имя"],
-  ["lastName", "Фамилия"],
-  ["birthDate", "Дата рождения (ДД.ММ.ГГГГ)"],
-  ["address.postalCode", "Индекс"],
-  ["address.region", "Регион"],
-  ["address.city", "Город"],
-  ["address.district", "Район"],
-  ["address.street", "Улица"],
-  ["address.house", "Дом"],
-  ["address.apartment", "Квартира"],
+  "firstName",
+  "lastName",
+  "birthDate",
+  "address.postalCode",
+  "address.region",
+  "address.city",
+  "address.district",
+  "address.street",
+  "address.house",
+  "address.apartment",
 ] as const;
-const CARD_FIELDS = [
-  ["card.number", "Номер карты"],
-  ["card.expiry", "Срок действия (ММ/ГГ)"],
-] as const;
+const CARD_FIELDS = ["card.number", "card.expiry"] as const;
 
-type FieldKey = (typeof FIELDS)[number][0] | (typeof CARD_FIELDS)[number][0] | "email";
+type FieldKey = (typeof FIELDS)[number] | (typeof CARD_FIELDS)[number] | "email";
 type Values = Record<FieldKey, string>;
+/** Field errors are kept as keys and put into words while rendering, in the current language. */
+type FieldError = keyof Messages["details"]["errors"];
+type FieldErrors = Partial<Record<FieldKey, FieldError>>;
 
 const EMPTY: Values = {
   firstName: "",
@@ -60,23 +62,23 @@ export function toIsoDate(value: string): string | null {
 }
 
 /** Format checks only; whether the data is acceptable is the adapter's call (G-2). */
-function localErrors(values: Values, withCard: boolean): Partial<Record<FieldKey, string>> {
-  const errors: Partial<Record<FieldKey, string>> = {};
-  for (const [key] of FIELDS) {
+function localErrors(values: Values, withCard: boolean): FieldErrors {
+  const errors: FieldErrors = {};
+  for (const key of FIELDS) {
     // An empty apartment means "no apartment" (CQ-01 stays open).
-    if (key !== "address.apartment" && values[key].trim() === "") errors[key] = "Заполните поле";
+    if (key !== "address.apartment" && values[key].trim() === "") errors[key] = "required";
   }
-  if (values.birthDate.trim() !== "" && !toIsoDate(values.birthDate)) errors.birthDate = "Дата в формате ДД.ММ.ГГГГ";
+  if (values.birthDate.trim() !== "" && !toIsoDate(values.birthDate)) errors.birthDate = "dateFormat";
   if (withCard) {
-    if (!/^\d+$/.test(values["card.number"].replace(/\s/g, ""))) errors["card.number"] = "Только цифры";
-    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(values["card.expiry"].trim())) errors["card.expiry"] = "Формат ММ/ГГ";
+    if (!/^\d+$/.test(values["card.number"].replace(/\s/g, ""))) errors["card.number"] = "digitsOnly";
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(values["card.expiry"].trim())) errors["card.expiry"] = "expiryFormat";
   }
   return errors;
 }
 
 type EmailState =
   | { step: "idle" }
-  | { step: "sent"; delivery: CodeDelivery; attempt: number; checking: boolean; error?: string | undefined }
+  | { step: "sent"; delivery: CodeDelivery; attempt: number; checking: boolean; codeInvalid?: boolean }
   | { step: "verified" };
 
 /**
@@ -87,12 +89,13 @@ export function PersonalDetailsScreen() {
   const adapter = useBankingAdapter();
   const flow = useRegistrationFlow();
   const navigate = useNavigate();
+  const t = useMessages();
   const withCard = flow.onboardingContext === "existing_customer";
   const [values, setValues] = useState<Values>(EMPTY);
   const [consents, setConsents] = useState({ push: false, marketing: false });
-  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [email, setEmail] = useState<EmailState>({ step: "idle" });
-  const [status, setStatus] = useState<ScreenStatus | null>(null);
+  const [status, setStatus] = useState<ContractError | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const inFlight = useRef(false);
 
@@ -103,7 +106,7 @@ export function PersonalDetailsScreen() {
     try {
       await work();
     } catch {
-      setStatus(statusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
       setSubmitting(false);
@@ -128,24 +131,24 @@ export function PersonalDetailsScreen() {
           checking: false,
         }));
       } else if (result.error.code === "VALIDATION_FAILED") {
-        setErrors((current) => ({ ...current, email: "Проверьте адрес почты" }));
+        setErrors((current) => ({ ...current, email: "checkEmail" }));
       } else {
-        setStatus(statusFor(result.error));
+        setStatus(result.error);
       }
     });
 
   const verifyCode = (code: string) =>
     once(async () => {
       if (email.step !== "sent") return;
-      setEmail({ ...email, checking: true, error: undefined });
+      setEmail({ ...email, checking: true, codeInvalid: false });
       const result = await adapter.verifyEmailCode({ code });
       if (result.ok) {
         setEmail({ step: "verified" });
       } else if (result.error.code === "CODE_INVALID") {
-        setEmail({ ...email, attempt: email.attempt + 1, checking: false, error: "Неверный код" });
+        setEmail({ ...email, attempt: email.attempt + 1, checking: false, codeInvalid: true });
       } else {
         setEmail({ ...email, checking: false });
-        setStatus(statusFor(result.error));
+        setStatus(result.error);
       }
     });
 
@@ -158,7 +161,7 @@ export function PersonalDetailsScreen() {
         return;
       }
       if (email.step !== "verified") {
-        setErrors({ email: "Подтвердите почту кодом из письма" });
+        setErrors({ email: "confirmEmail" });
         return;
       }
       const details: PersonalDetails = {
@@ -189,37 +192,40 @@ export function PersonalDetailsScreen() {
       }
       const { code, fields = [] } = result.error;
       if (code === "AGE_RESTRICTION") {
-        setErrors({ birthDate: "Регистрация доступна с 18 лет" });
+        setErrors({ birthDate: "age" });
       } else if (code === "VALIDATION_FAILED" && fields.length > 0) {
-        setErrors(Object.fromEntries(fields.map((field) => [field, "Проверьте значение"])));
+        setErrors(Object.fromEntries(fields.map((field) => [field, "checkValue"])));
       } else if (code === "STATE_CONFLICT" && fields.includes("email")) {
         setEmail({ step: "idle" });
-        setErrors({ email: "Подтвердите почту кодом из письма" });
+        setErrors({ email: "confirmEmail" });
       } else {
-        setStatus(statusFor(result.error));
+        setStatus(result.error);
       }
     });
 
-  const field = (key: FieldKey, label: string) => (
-    <Input
-      key={key}
-      label={label}
-      block
-      value={values[key]}
-      error={errors[key]}
-      disabled={submitting}
-      onChange={(_event, payload) => update(key, payload.value)}
-    />
-  );
+  const field = (key: FieldKey) => {
+    const error = errors[key];
+    return (
+      <Input
+        key={key}
+        label={t.details.fields[key]}
+        block
+        value={values[key]}
+        error={error && t.details.errors[error]}
+        disabled={submitting}
+        onChange={(_event, payload) => update(key, payload.value)}
+      />
+    );
+  };
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Личные данные" onBack={() => navigate(-1)} />}>
-      {FIELDS.map(([key, label]) => field(key, label))}
-      {field("email", "Почта")}
+    <AppShell variant="auth" header={<AppHeader title={t.details.title} onBack={() => navigate(-1)} />}>
+      {FIELDS.map((key) => field(key))}
+      {field("email")}
       {email.step === "idle" && (
         <ActionButton
           action="confirm"
-          label="Получить код на почту"
+          label={t.details.getEmailCode}
           disabled={values.email.trim() === ""}
           loading={submitting}
           onPress={() => void sendCode()}
@@ -232,30 +238,30 @@ export function PersonalDetailsScreen() {
           codeLength={email.delivery.codeLength}
           resendAfter={email.delivery.resendAfterSec}
           status={email.checking ? "checking" : "input"}
-          error={email.error}
+          error={email.codeInvalid ? t.otp.invalid : undefined}
           onSubmit={(code) => void verifyCode(code)}
           onResend={() => void sendCode()}
         />
       )}
       {email.step === "verified" && (
         <Typography.Text tag="p" view="primary-medium" role="status">
-          Почта подтверждена
+          {t.details.emailConfirmed}
         </Typography.Text>
       )}
       <Checkbox
-        label="Согласен получать push-уведомления"
+        label={t.details.consentPush}
         checked={consents.push}
         disabled={submitting}
         onChange={(_event, payload) => setConsents((current) => ({ ...current, push: payload.checked }))}
       />
       <Checkbox
-        label="Согласен получать рекламные рассылки"
+        label={t.details.consentMarketing}
         checked={consents.marketing}
         disabled={submitting}
         onChange={(_event, payload) => setConsents((current) => ({ ...current, marketing: payload.checked }))}
       />
-      {withCard && CARD_FIELDS.map(([key, label]) => field(key, label))}
-      {status && <StatusMessage {...status} />}
+      {withCard && CARD_FIELDS.map((key) => field(key))}
+      {status && <StatusMessage {...statusFor(status, t)} />}
       <ActionButton action="next" loading={submitting} onPress={() => void submit()} />
     </AppShell>
   );

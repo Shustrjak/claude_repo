@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
-import type { AccountSummary } from "../../adapters/banking/types";
+import type { AccountSummary, ContractError } from "../../adapters/banking/types";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
 import { AppHeader } from "../../components/global/AppHeader";
 import { AppShell } from "../../components/global/AppShell";
 import { AccountCard } from "../../components/semantic/AccountCard";
 import { AsyncContent, type AsyncContentState } from "../../components/semantic/AsyncContent";
+import { useMessages } from "../../localization/LocalizationContext";
 import styles from "./HomeScreen.module.css";
 import { accountsFailure } from "./homeStatus";
 
-type Accounts = { status: "loading" } | { status: "loaded"; accounts: AccountSummary[] } | Extract<AsyncContentState, { status: "error" }>;
+/** The failure is kept as the contract error and put into words while rendering, in the current language. */
+type Accounts =
+  | { status: "loading" }
+  | { status: "loaded"; accounts: AccountSummary[] }
+  | { status: "failed"; error: ContractError };
 
 /**
  * HOME-01: every account `getAccounts()` returns, as `AccountCard` × N in the adapter's order (D-47).
@@ -17,6 +22,7 @@ type Accounts = { status: "loading" } | { status: "loaded"; accounts: AccountSum
  */
 export function HomeScreen() {
   const adapter = useBankingAdapter();
+  const t = useMessages();
   const [accounts, setAccounts] = useState<Accounts>({ status: "loading" });
   const [request, setRequest] = useState(0);
 
@@ -25,8 +31,9 @@ export function HomeScreen() {
     Promise.resolve()
       .then(() => adapter.getAccounts())
       .then(
-        (result): Accounts => (result.ok ? { status: "loaded", accounts: result.data } : accountsFailure(result.error)),
-        (): Accounts => accountsFailure({ code: "UNKNOWN" }),
+        (result): Accounts =>
+          result.ok ? { status: "loaded", accounts: result.data } : { status: "failed", error: result.error },
+        (): Accounts => ({ status: "failed", error: { code: "UNKNOWN" } }),
       )
       .then((next) => {
         if (active) setAccounts(next);
@@ -42,13 +49,19 @@ export function HomeScreen() {
   };
 
   const state: AsyncContentState =
-    accounts.status !== "loaded" ? accounts : accounts.accounts.length === 0 ? { status: "empty" } : { status: "data" };
+    accounts.status === "loading"
+      ? accounts
+      : accounts.status === "failed"
+        ? accountsFailure(accounts.error, t)
+        : accounts.accounts.length === 0
+          ? { status: "empty" }
+          : { status: "data" };
 
   return (
-    <AppShell variant="main" header={<AppHeader title="Главная" />}>
-      <AsyncContent state={state} empty={{ title: "Счетов пока нет" }} onRetry={retry}>
+    <AppShell variant="main" header={<AppHeader title={t.home.title} />}>
+      <AsyncContent state={state} empty={{ title: t.home.noAccounts }} onRetry={retry}>
         {accounts.status === "loaded" && (
-          <ul className={styles.accounts} aria-label="Счета">
+          <ul className={styles.accounts} aria-label={t.home.accounts}>
             {accounts.accounts.map((account) => (
               <li key={account.id}>
                 <AccountCard

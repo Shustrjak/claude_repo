@@ -51,10 +51,10 @@ describe("SET-01 Settings", () => {
     expect(router.state.location.pathname).toBe("/login");
   });
 
-  it("shows the rows of its composition; SET-04 waits for Q-17", () => {
+  it("shows the rows of its composition, all active (SET-04 by D-49)", () => {
     renderApp(stubBankingAdapter().adapter, { path: "/settings", authenticated: true });
     expect(screen.getByRole("button", { name: "Сменить MPIN" }).hasAttribute("disabled")).toBe(false);
-    expect(screen.getByRole("button", { name: "Язык" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Язык" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: "Вход по биометрии" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: "Выйти" }).hasAttribute("disabled")).toBe(false);
   });
@@ -71,7 +71,7 @@ describe("SET-01 Settings", () => {
     expect(router.state.location.pathname).toBe("/login");
     await act(() => router.navigate("/settings"));
     expect(router.state.location.pathname).toBe("/login"); // the session is closed
-    expect(otherCalls).toEqual([]);
+    expect(otherCalls).toEqual(["getLanguageSettings"]); // the app's own language load (D-49)
   });
 
   it.each([
@@ -134,7 +134,7 @@ describe("SET-03 Biometric login setting", () => {
       expect(screen.queryByText("Биометрия недоступна") !== null).toBe(expected.unavailable);
       // Showing the setting changes nothing: stored value, bank and device stay untouched.
       expect(storedPreference(preferenceStorage)).toEqual({ version: 1, biometricLoginEnabled: stored });
-      expect(otherCalls).toEqual([]);
+      expect(otherCalls.filter((call) => call !== "getLanguageSettings")).toEqual([]); // language load aside (D-49)
       expect(verifyBiometric).not.toHaveBeenCalled();
     });
   }
@@ -159,7 +159,7 @@ describe("SET-03 Biometric login setting", () => {
     // The device was only asked; nothing was verified; the bank was not involved.
     expect(isBiometricAvailable).toHaveBeenCalled();
     expect(verifyBiometric).not.toHaveBeenCalled();
-    expect(otherCalls).toEqual([]);
+    expect(otherCalls.filter((call) => call !== "getLanguageSettings")).toEqual([]); // language load aside (D-49)
   });
 });
 

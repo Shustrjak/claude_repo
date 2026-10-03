@@ -86,7 +86,8 @@ describe("SET-02 Change MPIN", () => {
     });
     expect(router.state.location.search + router.state.location.hash).not.toContain("5678");
     expect(window.localStorage.length + window.sessionStorage.length).toBe(0);
-    expect(bank.otherCalls).toEqual(["getAccounts"]); // only HOME-01's own load after the final navigation
+    // Only the app's language load after login (D-49) and HOME-01's own load after the final navigation.
+    expect([...bank.otherCalls].sort()).toEqual(["getAccounts", "getLanguageSettings"]);
   });
 
   it("stays on the OTP step with a controlled error for a wrong code, then accepts the right one", async () => {

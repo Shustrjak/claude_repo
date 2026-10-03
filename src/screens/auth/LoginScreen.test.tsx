@@ -48,7 +48,8 @@ describe("AUTH-01 Login", () => {
     await typeMpinOnKeypad(user, "1234");
     expect(login).toHaveBeenCalledExactlyOnceWith({ method: "mpin", mpin: "1234" });
     await expectHome(router);
-    expect(otherCalls).toEqual(["getAccounts"]); // login only opens the session; HOME-01 loads its own accounts (D-47)
+    // Login only opens the session; HOME-01 loads its accounts (D-47), the app loads the language (D-49).
+    expect([...otherCalls].sort()).toEqual(["getAccounts", "getLanguageSettings"]);
   });
 
   it("accepts digits from a physical keyboard and never submits fewer than 4", async () => {

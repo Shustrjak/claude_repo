@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useMessages } from "../../localization/LocalizationContext";
 import { Spinner } from "../primitives";
 import { ActionButton } from "./ActionButton";
 import { StatusMessage } from "./StatusMessage";
@@ -21,10 +22,11 @@ type Props = {
 
 /** Picks what to show: loading, error, emptiness or the content. It loads nothing itself. */
 export function AsyncContent({ state, empty, onRetry, children }: Props) {
+  const t = useMessages();
   switch (state.status) {
     case "loading":
       return (
-        <div role="status" aria-busy="true" aria-label="Загрузка">
+        <div role="status" aria-busy="true" aria-label={t.common.loading}>
           <Spinner visible preset={48} />
         </div>
       );

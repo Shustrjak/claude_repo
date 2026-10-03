@@ -1,5 +1,6 @@
 import { BiometricsFaceMIcon } from "@alfalab/icons-glyph/BiometricsFaceMIcon";
 import type { ReactNode } from "react";
+import { useMessages } from "../../localization/LocalizationContext";
 import { Cell, IconButton, Typography } from "../primitives";
 import styles from "./AuthMethodSelector.module.css";
 
@@ -27,6 +28,7 @@ export function AuthMethodSelector({
   onBiometricRequest,
   children,
 }: Props) {
+  const t = useMessages();
   const biometric = biometricAvailable && methods.includes("biometric");
   if (!biometric || !methods.includes("mpin")) {
     return biometric ? <BiometricAction disabled={disabled} onPress={onBiometricRequest} /> : <>{children}</>;
@@ -35,21 +37,22 @@ export function AuthMethodSelector({
     return (
       <div>
         <BiometricAction disabled={disabled} onPress={onBiometricRequest} />
-        <SwitchMethod label="Войти по MPIN" disabled={disabled} onPress={() => onSelect("mpin")} />
+        <SwitchMethod label={t.authMethod.mpin} disabled={disabled} onPress={() => onSelect("mpin")} />
       </div>
     );
   }
   return (
     <div>
       {children}
-      <SwitchMethod label="Войти по биометрии" disabled={disabled} onPress={() => onSelect("biometric")} />
+      <SwitchMethod label={t.authMethod.biometric} disabled={disabled} onPress={() => onSelect("biometric")} />
     </div>
   );
 }
 
 function BiometricAction({ disabled, onPress }: { disabled: boolean; onPress: () => void }) {
+  const t = useMessages();
   return (
-    <IconButton icon={BiometricsFaceMIcon} size={56} aria-label="Войти по биометрии" disabled={disabled} onClick={onPress} />
+    <IconButton icon={BiometricsFaceMIcon} size={56} aria-label={t.authMethod.biometric} disabled={disabled} onClick={onPress} />
   );
 }
 

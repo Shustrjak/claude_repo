@@ -8,7 +8,9 @@ import { AppShell } from "../../components/global/AppShell";
 import { PhoneInput } from "../../components/primitives";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { statusFor, type ScreenStatus } from "./registrationStatus";
+import type { ContractError } from "../../adapters/banking/types";
+import { useMessages } from "../../localization/LocalizationContext";
+import { statusFor } from "./registrationStatus";
 
 /** "+7 (999) 123-45-67" → "+79991234567", or null if it is not a full Russian number (D-15). */
 export function normalizePhone(input: string): string | null {
@@ -22,15 +24,16 @@ export function RegisterPhoneScreen() {
   const flow = useRegistrationFlow();
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
-  const [fieldError, setFieldError] = useState<string | undefined>();
-  const [status, setStatus] = useState<ScreenStatus | null>(null);
+  const t = useMessages();
+  const [fieldError, setFieldError] = useState<"incomplete" | "invalid" | undefined>();
+  const [status, setStatus] = useState<ContractError | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const inFlight = useRef(false);
 
   const submit = async () => {
     const normalized = normalizePhone(phone);
     if (!normalized) {
-      setFieldError("Введите номер полностью: +7 и 10 цифр");
+      setFieldError("incomplete");
       return;
     }
     if (inFlight.current) return;
@@ -45,12 +48,12 @@ export function RegisterPhoneScreen() {
         return;
       }
       if (result.error.code === "VALIDATION_FAILED") {
-        setFieldError("Проверьте номер телефона");
+        setFieldError("invalid");
       } else {
-        setStatus(statusFor(result.error));
+        setStatus(result.error);
       }
     } catch {
-      setStatus(statusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
       setSubmitting(false);
@@ -58,19 +61,19 @@ export function RegisterPhoneScreen() {
   };
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Регистрация" onBack={() => navigate(-1)} />}>
+    <AppShell variant="auth" header={<AppHeader title={t.registerPhone.title} onBack={() => navigate(-1)} />}>
       <PhoneInput
-        label="Номер телефона"
+        label={t.registerPhone.phone}
         block
         value={phone}
-        error={fieldError}
+        error={fieldError && t.registerPhone[fieldError]}
         disabled={submitting}
         onChange={(_event, payload) => {
           setPhone(payload.value);
           setFieldError(undefined);
         }}
       />
-      {status && <StatusMessage {...status} />}
+      {status && <StatusMessage {...statusFor(status, t)} />}
       <ActionButton action="next" loading={submitting} onPress={() => void submit()} />
     </AppShell>
   );

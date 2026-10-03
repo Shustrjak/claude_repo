@@ -13,7 +13,8 @@ import { AuthMethodSelector, type AuthMethod } from "../../components/semantic/A
 import { ListRow } from "../../components/semantic/ListRow";
 import { MPINInput } from "../../components/semantic/MPINInput";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { BIOMETRIC_NOT_VERIFIED, loginFailure, type LoginFailure } from "./loginFailure";
+import { useMessages } from "../../localization/LocalizationContext";
+import { loginFailure, type LoginProblem } from "./loginFailure";
 
 const METHODS: readonly AuthMethod[] = ["biometric", "mpin"];
 
@@ -37,12 +38,14 @@ export function LoginScreen() {
   const [deviceBiometricAvailable, setDeviceBiometricAvailable] = useState(false);
   const [method, setMethod] = useState<AuthMethod>("mpin");
   const [submitting, setSubmitting] = useState(false);
-  const [failure, setFailure] = useState<LoginFailure | null>(null);
+  const t = useMessages();
+  const [problem, setProblem] = useState<LoginProblem | null>(null);
   const [attempt, setAttempt] = useState(0);
   const inFlight = useRef(false);
 
   // D-33: offer biometrics only if the user enabled them AND the device can do them.
   const biometricOffered = biometricLoginEnabled && deviceBiometricAvailable;
+  const failure = problem && loginFailure(problem, t); // in the current language
 
   useEffect(() => {
     if (!biometricLoginEnabled) {
@@ -70,7 +73,7 @@ export function LoginScreen() {
     }
     inFlight.current = true;
     setSubmitting(true);
-    setFailure(null);
+    setProblem(null);
     let outcome: Awaited<ReturnType<Attempt>>;
     try {
       outcome = await run();
@@ -81,7 +84,7 @@ export function LoginScreen() {
       setSubmitting(false);
     }
     if (outcome === "device_not_verified") {
-      setFailure(BIOMETRIC_NOT_VERIFIED);
+      setProblem("biometric_not_verified");
       setMethod("mpin"); // the bank was not asked; MPIN stays available
       return;
     }
@@ -90,7 +93,7 @@ export function LoginScreen() {
       navigate(paths.home, { replace: true });
       return;
     }
-    setFailure(loginFailure(outcome.error));
+    setProblem(outcome.error);
     setAttempt((count) => count + 1); // fresh, empty MPIN input after a failure
   };
 
@@ -103,7 +106,7 @@ export function LoginScreen() {
     });
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Вход" />}>
+    <AppShell variant="auth" header={<AppHeader title={t.login.title} />}>
       <AuthMethodSelector
         methods={METHODS}
         current={method}
@@ -123,10 +126,10 @@ export function LoginScreen() {
       {failure?.target === "status" && (
         <StatusMessage kind={failure.kind} title={failure.title} description={failure.description} />
       )}
-      <ListRow variant="link" title="Открыть счёт" disabled={submitting} onPress={() => navigate(paths.openAccount)} />
+      <ListRow variant="link" title={t.login.openAccount} disabled={submitting} onPress={() => navigate(paths.openAccount)} />
       <ListRow
         variant="link"
-        title="Зарегистрироваться"
+        title={t.login.register}
         disabled={submitting}
         onPress={() => navigate(paths.register.phone, { state: EXISTING_CUSTOMER })}
       />

@@ -1,5 +1,6 @@
 import { TabBar } from "@alfalab/core-components-tab-bar";
 import type { ReactNode } from "react";
+import { useMessages } from "../../localization/LocalizationContext";
 import styles from "./BottomNavigation.module.css";
 
 export type BottomNavigationItem = {
@@ -21,8 +22,9 @@ const tabId = (id: string) => `nav-${id}`;
 
 /** Bottom navigation (node N19). It renders items and reports a choice; it knows no routes or data. */
 export function BottomNavigation({ items, active, onSelect }: Props) {
+  const t = useMessages();
   return (
-    <nav aria-label="Основная навигация" className={styles.bar}>
+    <nav aria-label={t.navigation.label} className={styles.bar}>
       <TabBar selectedId={active === null ? "" : tabId(active)} border>
         {items.map((item) => (
           <TabBar.Tab
@@ -30,6 +32,7 @@ export function BottomNavigation({ items, active, onSelect }: Props) {
             id={tabId(item.id)}
             label={item.label}
             icon={item.icon}
+            labelClassName={styles.label ?? ""}
             disabled={item.disabled === true}
             aria-current={item.id === active ? "page" : undefined}
             onClick={() => {

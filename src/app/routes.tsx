@@ -11,6 +11,7 @@ import { SetMpinScreen } from "../screens/auth/SetMpinScreen";
 import { HomeScreen } from "../screens/home/HomeScreen";
 import { BiometricSettingsScreen } from "../screens/settings/BiometricSettingsScreen";
 import { ChangeMpinScreen } from "../screens/settings/ChangeMpinScreen";
+import { LanguageSettingsScreen } from "../screens/settings/LanguageSettingsScreen";
 import { SettingsScreen } from "../screens/settings/SettingsScreen";
 import { paths } from "./paths";
 import { RegistrationFlowLayout } from "./registration/RegistrationFlowLayout";
@@ -51,6 +52,7 @@ export const routes: RouteObject[] = [
       },
       { path: paths.changeMpin, element: <ChangeMpinScreen /> },
       { path: paths.biometricSettings, element: <BiometricSettingsScreen /> },
+      { path: paths.languageSettings, element: <LanguageSettingsScreen /> },
     ],
   },
   { path: "*", element: <Navigate to={paths.login} replace /> },

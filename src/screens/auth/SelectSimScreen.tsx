@@ -9,6 +9,7 @@ import { AppShell } from "../../components/global/AppShell";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { ChoiceList } from "../../components/semantic/ChoiceList";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
+import { useMessages } from "../../localization/LocalizationContext";
 
 /** Navigation state when AUTH-07 sends the user back here after a wrong OTP. */
 export type SelectSimState = { otpFailed: true };
@@ -25,6 +26,7 @@ export function SelectSimScreen() {
   const device = useDeviceCapability();
   const flow = useRegistrationFlow();
   const navigate = useNavigate();
+  const t = useMessages();
   const location = useLocation();
   const otpFailed = cameFromOtpFailure(location.state);
   const [sims, setSims] = useState<SimCard[] | null>(null);
@@ -63,22 +65,22 @@ export function SelectSimScreen() {
   const selected = sims?.some((sim) => sim.id === flow.selectedSimId) ? flow.selectedSimId : null;
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Выбор SIM-карты" onBack={() => navigate(-1)} />}>
+    <AppShell variant="auth" header={<AppHeader title={t.selectSim.title} onBack={() => navigate(-1)} />}>
       {otpFailed && (
-        <StatusMessage kind="error" title="Код не подошёл" description="Выберите SIM-карту ещё раз, затем введите новый код." />
+        <StatusMessage kind="error" title={t.selectSim.otpFailed} description={t.selectSim.chooseAgain} />
       )}
       {sims === null ? null : sims.length === 0 ? (
         <StatusMessage
           kind="empty"
-          title="SIM-карта не найдена"
-          description="Сейчас на устройстве нет доступной SIM-карты."
-          action={<ActionButton action="retry" label="Повторить поиск" loading={searching} onPress={() => void searchAgain()} />}
+          title={t.selectSim.notFound}
+          description={t.selectSim.noneOnDevice}
+          action={<ActionButton action="retry" label={t.selectSim.searchAgain} loading={searching} onPress={() => void searchAgain()} />}
         />
       ) : (
         <>
           <ChoiceList
-            label="SIM-карта"
-            items={sims.map((sim) => ({ id: sim.id, title: `SIM ${sim.slot}` }))}
+            label={t.selectSim.listLabel}
+            items={sims.map((sim) => ({ id: sim.id, title: t.selectSim.slot(sim.slot) }))}
             value={selected}
             onChange={(id) => flow.selectSim(id)}
           />

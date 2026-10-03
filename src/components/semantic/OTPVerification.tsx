@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { useMessages } from "../../localization/LocalizationContext";
 import { CodeInput, Typography } from "../primitives";
 import { ActionButton } from "./ActionButton";
 
@@ -19,6 +20,7 @@ type Props = {
  * it does not know which one it is (D-19). Remount it (React `key`) for a newly sent code.
  */
 export function OTPVerification({ destination, codeLength, resendAfter, status, error, onSubmit, onResend }: Props) {
+  const t = useMessages();
   const [secondsLeft, setSecondsLeft] = useState(resendAfter);
   const titleId = useId();
 
@@ -32,7 +34,7 @@ export function OTPVerification({ destination, codeLength, resendAfter, status, 
   return (
     <section aria-labelledby={titleId}>
       <Typography.Text tag="p" view="primary-medium" id={titleId}>
-        Код отправлен: {destination}
+        {t.otp.sentTo(destination)}
       </Typography.Text>
       <CodeInput
         fields={codeLength}
@@ -42,10 +44,10 @@ export function OTPVerification({ destination, codeLength, resendAfter, status, 
       />
       {secondsLeft > 0 ? (
         <Typography.Text tag="p" view="primary-small" color="secondary">
-          Отправить ещё раз через {secondsLeft} с
+          {t.otp.resendIn(secondsLeft)}
         </Typography.Text>
       ) : (
-        <ActionButton action="retry" label="Отправить код ещё раз" disabled={status === "checking"} onPress={onResend} />
+        <ActionButton action="retry" label={t.otp.resend} disabled={status === "checking"} onPress={onResend} />
       )}
     </section>
   );

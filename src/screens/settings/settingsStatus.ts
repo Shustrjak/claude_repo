@@ -1,17 +1,18 @@
 import type { ContractError } from "../../adapters/banking/types";
+import type { Messages } from "../../localization/messages";
 
 export type SettingsStatus = { kind: "error" | "unavailable"; title: string; description: string };
 
-/** Banking errors on settings screens that no field owns. Raw codes never reach the user. */
-export function settingsStatusFor(error: ContractError): SettingsStatus {
+/** Banking errors on settings screens that no field owns, in the current language. Raw codes never reach the user. */
+export function settingsStatusFor(error: ContractError, t: Messages): SettingsStatus {
   switch (error.code) {
     case "UNAVAILABLE":
-      return { kind: "unavailable", title: "Банк сейчас недоступен", description: "Банковское ядро не подключено." };
+      return { kind: "unavailable", title: t.status.bankUnavailable, description: t.status.coreNotConnected };
     case "SESSION_EXPIRED":
-      return { kind: "error", title: "Сессия истекла", description: "Войдите снова и повторите." };
+      return { kind: "error", title: t.status.sessionExpired, description: t.status.signInAgainAndRetry };
     case "STATE_CONFLICT":
-      return { kind: "error", title: "Сначала подтвердите код", description: "Запросите код и введите его снова." };
+      return { kind: "error", title: t.settings.confirmCodeFirst, description: t.settings.requestCodeAgain };
     default:
-      return { kind: "error", title: "Что-то пошло не так", description: "Попробуйте ещё раз." };
+      return { kind: "error", title: t.status.somethingWrong, description: t.status.tryAgain };
   }
 }

@@ -5,6 +5,7 @@ import { AppHeader } from "../../components/global/AppHeader";
 import { AppShell } from "../../components/global/AppShell";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { ListRow } from "../../components/semantic/ListRow";
+import { useMessages } from "../../localization/LocalizationContext";
 
 const NEW_CUSTOMER: RegistrationEntryState = { onboardingContext: "new_customer" };
 
@@ -14,11 +15,12 @@ const NEW_CUSTOMER: RegistrationEntryState = { onboardingContext: "new_customer"
  */
 export function OpenAccountScreen() {
   const navigate = useNavigate();
+  const t = useMessages();
   return (
-    <AppShell variant="auth" header={<AppHeader title="Открыть счёт" onBack={() => navigate(paths.login)} />}>
-      <ListRow variant="link" title="Сберегательный счёт" disabled />
-      <ListRow variant="link" title="Текущий счёт" disabled />
-      <ListRow variant="link" title="Кредиты" disabled />
+    <AppShell variant="auth" header={<AppHeader title={t.openAccount.title} onBack={() => navigate(paths.login)} />}>
+      <ListRow variant="link" title={t.openAccount.savings} disabled />
+      <ListRow variant="link" title={t.openAccount.current} disabled />
+      <ListRow variant="link" title={t.openAccount.loans} disabled />
       <ActionButton action="next" onPress={() => navigate(paths.register.phone, { state: NEW_CUSTOMER })} />
     </AppShell>
   );

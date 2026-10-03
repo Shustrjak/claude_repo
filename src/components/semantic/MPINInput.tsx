@@ -1,17 +1,12 @@
 import { useId, useState, type KeyboardEvent } from "react";
+import { useMessages } from "../../localization/LocalizationContext";
 import { PassCode, Typography } from "../primitives";
 
 /** MPIN is exactly four digits (D-09); not configurable. */
 export const MPIN_LENGTH = 4;
 
-const TITLES = {
-  enter: "Введите MPIN",
-  create: "Придумайте MPIN",
-  confirm: "Повторите MPIN",
-} as const;
-
 type Props = {
-  mode: keyof typeof TITLES;
+  mode: "enter" | "create" | "confirm";
   /** Error text from the screen; whether a MPIN is correct is decided elsewhere. */
   error?: string | undefined;
   disabled?: boolean;
@@ -24,6 +19,7 @@ type Props = {
  * Keeps the digits in local state only. Remount it (React `key`) to start over.
  */
 export function MPINInput({ mode, error, disabled = false, onComplete }: Props) {
+  const t = useMessages();
   const [value, setValue] = useState("");
   const titleId = useId();
   const errorId = useId();
@@ -58,7 +54,7 @@ export function MPINInput({ mode, error, disabled = false, onComplete }: Props) 
       onKeyDown={handleKeyDown}
     >
       <Typography.Title tag="h2" view="small" id={titleId}>
-        {TITLES[mode]}
+        {t.mpin[mode]}
       </Typography.Title>
       <PassCode value={value} onChange={change} codeLength={MPIN_LENGTH} error={Boolean(error)} disabled={disabled} />
       {error && (

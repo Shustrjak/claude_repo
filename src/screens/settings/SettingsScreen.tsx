@@ -6,15 +6,17 @@ import { paths } from "../../app/paths";
 import { AppHeader } from "../../components/global/AppHeader";
 import { AppShell } from "../../components/global/AppShell";
 import { ListRow } from "../../components/semantic/ListRow";
+import { useMessages } from "../../localization/LocalizationContext";
 
 /**
  * SET-01 Settings, reached from the bottom navigation (D-43). Logout is immediate (D-32) and
- * always closes the app session, whatever the bank answers (D-44). SET-04 waits for Q-17.
+ * always closes the app session, whatever the bank answers (D-44). «Язык» opens SET-04 (D-49).
  */
 export function SettingsScreen() {
   const adapter = useBankingAdapter();
   const session = useAppSession();
   const navigate = useNavigate();
+  const t = useMessages();
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
 
@@ -28,11 +30,11 @@ export function SettingsScreen() {
   };
 
   return (
-    <AppShell variant="main" header={<AppHeader title="Настройки" />}>
-      <ListRow variant="link" title="Сменить MPIN" onPress={() => navigate(paths.changeMpin)} />
-      <ListRow variant="link" title="Вход по биометрии" onPress={() => navigate(paths.biometricSettings)} />
-      <ListRow variant="link" title="Язык" disabled />
-      <ListRow variant="danger" title="Выйти" disabled={busy} onPress={() => void logout()} />
+    <AppShell variant="main" header={<AppHeader title={t.settings.title} />}>
+      <ListRow variant="link" title={t.settings.changeMpin} onPress={() => navigate(paths.changeMpin)} />
+      <ListRow variant="link" title={t.settings.biometric} onPress={() => navigate(paths.biometricSettings)} />
+      <ListRow variant="link" title={t.settings.language} onPress={() => navigate(paths.languageSettings)} />
+      <ListRow variant="danger" title={t.settings.logout} disabled={busy} onPress={() => void logout()} />
     </AppShell>
   );
 }

@@ -8,6 +8,7 @@ import { BankingAdapterProvider } from "./app/BankingAdapterProvider";
 import { createBankingAdapter } from "./app/createBankingAdapter";
 import { createDeviceCapabilityAdapter } from "./app/createDeviceCapabilityAdapter";
 import { DeviceCapabilityProvider } from "./app/DeviceCapabilityProvider";
+import { LanguageProvider } from "./app/LanguageProvider";
 import { router } from "./app/router";
 
 // Composition root: the only place that chooses implementations. The two boundaries are independent.
@@ -25,7 +26,9 @@ createRoot(root).render(
       <DeviceCapabilityProvider device={device}>
         <BiometricLoginPreferenceProvider>
           <AppSessionProvider>
-            <RouterProvider router={router} />
+            <LanguageProvider>
+              <RouterProvider router={router} />
+            </LanguageProvider>
           </AppSessionProvider>
         </BiometricLoginPreferenceProvider>
       </DeviceCapabilityProvider>

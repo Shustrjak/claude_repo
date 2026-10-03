@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import type { CodeDelivery } from "../../adapters/banking/types";
+import type { CodeDelivery, ContractError } from "../../adapters/banking/types";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
 import { paths } from "../../app/paths";
 import { AppHeader } from "../../components/global/AppHeader";
@@ -10,7 +10,8 @@ import { MPINInput } from "../../components/semantic/MPINInput";
 import { OperationStatus } from "../../components/semantic/OperationStatus";
 import { OTPVerification } from "../../components/semantic/OTPVerification";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { settingsStatusFor, type SettingsStatus } from "./settingsStatus";
+import { useMessages } from "../../localization/LocalizationContext";
+import { settingsStatusFor } from "./settingsStatus";
 
 type Step = "otp" | "mpin" | "done";
 
@@ -22,15 +23,16 @@ type Step = "otp" | "mpin" | "done";
 export function ChangeMpinScreen() {
   const adapter = useBankingAdapter();
   const navigate = useNavigate();
+  const t = useMessages();
   const [step, setStep] = useState<Step>("otp");
   const [delivery, setDelivery] = useState<CodeDelivery | null>(null);
   const [sent, setSent] = useState(0);
-  const [codeError, setCodeError] = useState<string | undefined>();
+  const [codeInvalid, setCodeInvalid] = useState(false);
   const [first, setFirst] = useState<string | null>(null);
   const [newMpin, setNewMpin] = useState<string | null>(null);
   const [mismatch, setMismatch] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [status, setStatus] = useState<SettingsStatus | null>(null);
+  const [status, setStatus] = useState<ContractError | null>(null);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
 
@@ -41,7 +43,7 @@ export function ChangeMpinScreen() {
     try {
       await work();
     } catch {
-      setStatus(settingsStatusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -56,9 +58,9 @@ export function ChangeMpinScreen() {
         if (result.ok) {
           setDelivery(result.data);
           setSent((count) => count + 1);
-          setCodeError(undefined);
+          setCodeInvalid(false);
         } else {
-          setStatus(settingsStatusFor(result.error));
+          setStatus(result.error);
         }
       }),
     [adapter, once],
@@ -78,10 +80,10 @@ export function ChangeMpinScreen() {
       if (result.ok) {
         setStep("mpin");
       } else if (result.error.code === "CODE_INVALID") {
-        setCodeError("Неверный код");
+        setCodeInvalid(true);
         setSent((count) => count + 1); // fresh, empty code input
       } else {
-        setStatus(settingsStatusFor(result.error));
+        setStatus(result.error);
       }
     });
 
@@ -107,7 +109,7 @@ export function ChangeMpinScreen() {
         return;
       }
       setAttempt((count) => count + 1);
-      setStatus(settingsStatusFor(result.error));
+      setStatus(result.error);
     });
 
   const back = () => navigate(paths.settings);
@@ -115,7 +117,7 @@ export function ChangeMpinScreen() {
   return (
     <AppShell
       variant="main"
-      header={<AppHeader title="Сменить MPIN" {...(step === "done" ? {} : { onBack: back })} />}
+      header={<AppHeader title={t.changeMpin.title} {...(step === "done" ? {} : { onBack: back })} />}
     >
       {step === "otp" && delivery && (
         <OTPVerification
@@ -124,13 +126,13 @@ export function ChangeMpinScreen() {
           codeLength={delivery.codeLength}
           resendAfter={delivery.resendAfterSec}
           status={busy ? "checking" : "input"}
-          error={codeError}
+          error={codeInvalid ? t.otp.invalid : undefined}
           onSubmit={(code) => void verifyCode(code)}
           onResend={() => void requestCode()}
         />
       )}
       {step === "otp" && !delivery && status && (
-        <ActionButton action="retry" label="Отправить код" loading={busy} onPress={() => void requestCode()} />
+        <ActionButton action="retry" label={t.otp.send} loading={busy} onPress={() => void requestCode()} />
       )}
       {step === "mpin" &&
         newMpin === null &&
@@ -138,7 +140,7 @@ export function ChangeMpinScreen() {
           <MPINInput
             key={`create-${attempt}`}
             mode="create"
-            error={mismatch ? "MPIN не совпадают. Придумайте MPIN заново." : undefined}
+            error={mismatch ? t.mpin.mismatch : undefined}
             onComplete={(pin) => {
               setMismatch(false);
               setFirst(pin);
@@ -153,12 +155,12 @@ export function ChangeMpinScreen() {
       {step === "done" && (
         <OperationStatus
           status="success"
-          title="MPIN изменён"
-          description="Входите с новым MPIN."
+          title={t.changeMpin.changed}
+          description={t.changeMpin.useNewMpin}
           actions={<ActionButton action="close" onPress={back} />}
         />
       )}
-      {status && <StatusMessage {...status} />}
+      {status && <StatusMessage {...settingsStatusFor(status, t)} />}
     </AppShell>
   );
 }

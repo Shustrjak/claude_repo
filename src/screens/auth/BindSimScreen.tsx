@@ -8,6 +8,7 @@ import { AppShell } from "../../components/global/AppShell";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { ListRow } from "../../components/semantic/ListRow";
 import { OperationStatus } from "../../components/semantic/OperationStatus";
+import { useMessages } from "../../localization/LocalizationContext";
 
 type BindState = "pending" | "bound" | "failed";
 
@@ -19,6 +20,7 @@ export function BindSimScreen() {
   const device = useDeviceCapability();
   const flow = useRegistrationFlow();
   const navigate = useNavigate();
+  const t = useMessages();
   const [state, setState] = useState<BindState>("pending");
   const inFlight = useRef(false);
   const { selectedSimId, markSimBound } = flow;
@@ -45,12 +47,12 @@ export function BindSimScreen() {
   }, [bind]);
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Привязка SIM-карты" />}>
-      {state === "pending" && <OperationStatus status="pending" title="Привязываем SIM-карту" />}
+    <AppShell variant="auth" header={<AppHeader title={t.bindSim.title} />}>
+      {state === "pending" && <OperationStatus status="pending" title={t.bindSim.pending} />}
       {state === "bound" && (
         <OperationStatus
           status="success"
-          title="SIM-карта привязана"
+          title={t.bindSim.bound}
           actions={
             <ActionButton
               action="next"
@@ -67,14 +69,14 @@ export function BindSimScreen() {
       {state === "failed" && (
         <OperationStatus
           status="failure"
-          title="Не удалось привязать SIM-карту"
-          description="Попробуйте ещё раз или выберите другую SIM-карту."
+          title={t.bindSim.failed}
+          description={t.bindSim.failedHint}
           actions={
             <>
               <ActionButton action="retry" onPress={() => void bind()} />
               <ListRow
                 variant="link"
-                title="Выбрать другую SIM"
+                title={t.bindSim.chooseAnother}
                 onPress={() => navigate(paths.register.sim, { replace: true })}
               />
             </>

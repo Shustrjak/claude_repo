@@ -1,38 +1,30 @@
 import type { ContractError } from "../../adapters/banking/types";
+import type { Messages } from "../../localization/messages";
+
+/** What went wrong with a login attempt: a contract error, or the device did not confirm biometrics. */
+export type LoginProblem = ContractError | "biometric_not_verified";
 
 /** What AUTH-01 shows for a failed login: an MPIN error, or a status message. */
 export type LoginFailure =
   | { target: "mpin"; message: string }
   | { target: "status"; kind: "error" | "unavailable"; title: string; description: string };
 
-/** The device did not confirm biometrics: a device state, not a banking error. The bank was not asked. */
-export const BIOMETRIC_NOT_VERIFIED: LoginFailure = {
-  target: "status",
-  kind: "error",
-  title: "Биометрия не подтверждена",
-  description: "Войдите по MPIN.",
-};
-
-/** Maps contract errors of `login` to UI state. Raw codes never reach the user. */
-export function loginFailure(error: ContractError): LoginFailure {
-  switch (error.code) {
+/**
+ * Maps a failed login to UI state in the current language. Raw codes never reach the user.
+ * Biometrics not confirmed is a device state, not a banking error: the bank was not asked.
+ */
+export function loginFailure(problem: LoginProblem, t: Messages): LoginFailure {
+  if (problem === "biometric_not_verified") {
+    return { target: "status", kind: "error", title: t.login.biometricNotVerified, description: t.login.useMpin };
+  }
+  switch (problem.code) {
     case "MPIN_INVALID":
-      return { target: "mpin", message: "Неверный MPIN. Попробуйте ещё раз." };
+      return { target: "mpin", message: t.login.mpinInvalid };
     case "UNAVAILABLE":
-      return {
-        target: "status",
-        kind: "unavailable",
-        title: "Банк сейчас недоступен",
-        description: "Банковское ядро не подключено, войти не получится.",
-      };
+      return { target: "status", kind: "unavailable", title: t.status.bankUnavailable, description: t.login.unavailable };
     case "STATE_CONFLICT":
-      return {
-        target: "status",
-        kind: "error",
-        title: "На этом устройстве нет регистрации",
-        description: "Сначала зарегистрируйтесь в мобильном банке.",
-      };
+      return { target: "status", kind: "error", title: t.login.notRegistered, description: t.login.registerFirst };
     default:
-      return { target: "status", kind: "error", title: "Не удалось войти", description: "Попробуйте ещё раз." };
+      return { target: "status", kind: "error", title: t.login.failed, description: t.status.tryAgain };
   }
 }

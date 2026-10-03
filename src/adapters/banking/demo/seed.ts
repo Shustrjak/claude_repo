@@ -9,7 +9,7 @@ function parseSeed(value: unknown): DemoSeed {
 }
 
 /**
- * Deterministic demo seed. Demo values only: the language list does not answer Q-17,
- * and the demo MPIN (1234) and demo codes (123456) are documented test credentials.
+ * Deterministic demo seed. Its languages, ru and en, are the v1 interface languages (D-49);
+ * the demo MPIN (1234) and demo codes (123456) are documented test credentials.
  */
 export const demoSeed: DemoSeed = parseSeed(seedJson);

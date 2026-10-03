@@ -8,6 +8,7 @@ import { AppSessionProvider } from "../app/AppSessionProvider";
 import { BankingAdapterProvider } from "../app/BankingAdapterProvider";
 import { BiometricLoginPreferenceProvider } from "../app/BiometricLoginPreferenceProvider";
 import { DeviceCapabilityProvider } from "../app/DeviceCapabilityProvider";
+import { LanguageProvider } from "../app/LanguageProvider";
 import { routes } from "../app/routes";
 
 export function memoryPreferenceStorage(): PreferenceStorage & { items: Map<string, string> } {
@@ -42,7 +43,9 @@ export function renderApp(
       <DeviceCapabilityProvider device={device}>
         <BiometricLoginPreferenceProvider storage={storage}>
           <AppSessionProvider initiallyAuthenticated={authenticated}>
-            <RouterProvider router={router} />
+            <LanguageProvider>
+              <RouterProvider router={router} />
+            </LanguageProvider>
           </AppSessionProvider>
         </BiometricLoginPreferenceProvider>
       </DeviceCapabilityProvider>

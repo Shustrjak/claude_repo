@@ -10,7 +10,9 @@ import { ActionButton } from "../../components/semantic/ActionButton";
 import { ListRow } from "../../components/semantic/ListRow";
 import { MPINInput } from "../../components/semantic/MPINInput";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { statusFor, type ScreenStatus } from "./registrationStatus";
+import type { ContractError } from "../../adapters/banking/types";
+import { useMessages } from "../../localization/LocalizationContext";
+import { statusFor } from "./registrationStatus";
 
 /**
  * AUTH-06 Set MPIN & Enable Biometric: a new 4-digit MPIN entered twice (the screen checks they
@@ -23,13 +25,14 @@ export function SetMpinScreen() {
   const device = useDeviceCapability();
   const flow = useRegistrationFlow();
   const navigate = useNavigate();
+  const t = useMessages();
   const [first, setFirst] = useState<string | null>(null);
   const [mpin, setMpin] = useState<string | null>(null);
   const [mismatch, setMismatch] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [enableBiometric, setEnableBiometric] = useState(false);
-  const [status, setStatus] = useState<ScreenStatus | null>(null);
+  const [status, setStatus] = useState<ContractError | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const inFlight = useRef(false);
 
@@ -73,9 +76,9 @@ export function SetMpinScreen() {
         setFirst(null);
         setAttempt((count) => count + 1);
       }
-      setStatus(statusFor(result.error));
+      setStatus(result.error);
     } catch {
-      setStatus(statusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
       setSubmitting(false);
@@ -83,13 +86,13 @@ export function SetMpinScreen() {
   };
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="MPIN и биометрия" onBack={() => navigate(-1)} />}>
+    <AppShell variant="auth" header={<AppHeader title={t.setMpin.title} onBack={() => navigate(-1)} />}>
       {mpin === null &&
         (first === null ? (
           <MPINInput
             key={`create-${attempt}`}
             mode="create"
-            error={mismatch ? "MPIN не совпадают. Придумайте MPIN заново." : undefined}
+            error={mismatch ? t.mpin.mismatch : undefined}
             onComplete={(pin) => {
               setMismatch(false);
               setFirst(pin);
@@ -100,13 +103,13 @@ export function SetMpinScreen() {
         ))}
       <ListRow
         variant="toggle"
-        title="Входить по биометрии"
-        subtitle={biometricAvailable ? undefined : "Недоступно на этом устройстве"}
+        title={t.setMpin.biometricToggle}
+        subtitle={biometricAvailable ? undefined : t.setMpin.biometricUnavailable}
         disabled={!biometricAvailable || submitting}
         checked={biometricAvailable && enableBiometric}
         onToggle={setEnableBiometric}
       />
-      {status && <StatusMessage {...status} />}
+      {status && <StatusMessage {...statusFor(status, t)} />}
       <ActionButton action="next" disabled={mpin === null} loading={submitting} onPress={() => void submit()} />
     </AppShell>
   );

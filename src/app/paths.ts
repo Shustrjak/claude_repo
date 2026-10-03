@@ -6,6 +6,7 @@ export const paths = {
   settings: "/settings",
   changeMpin: "/settings/mpin",
   biometricSettings: "/settings/biometric",
+  languageSettings: "/settings/language",
   register: {
     phone: "/register/phone",
     sim: "/register/sim",

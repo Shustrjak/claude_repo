@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import type { CodeDelivery } from "../../adapters/banking/types";
+import type { CodeDelivery, ContractError } from "../../adapters/banking/types";
 import { useAppSession } from "../../app/AppSessionContext";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
 import { useBiometricLoginPreference } from "../../app/BiometricLoginPreferenceContext";
@@ -11,7 +11,8 @@ import { AppShell } from "../../components/global/AppShell";
 import { ActionButton } from "../../components/semantic/ActionButton";
 import { OTPVerification } from "../../components/semantic/OTPVerification";
 import { StatusMessage } from "../../components/semantic/StatusMessage";
-import { statusFor, type ScreenStatus } from "./registrationStatus";
+import { useMessages } from "../../localization/LocalizationContext";
+import { statusFor } from "./registrationStatus";
 import type { SelectSimState } from "./SelectSimScreen";
 
 /**
@@ -25,10 +26,11 @@ export function OnboardingOtpScreen() {
   const session = useAppSession();
   const { setBiometricLoginEnabled } = useBiometricLoginPreference();
   const navigate = useNavigate();
+  const t = useMessages();
   const [delivery, setDelivery] = useState<CodeDelivery | null>(null);
   const [sent, setSent] = useState(0);
   const [checking, setChecking] = useState(false);
-  const [status, setStatus] = useState<ScreenStatus | null>(null);
+  const [status, setStatus] = useState<ContractError | null>(null);
   const inFlight = useRef(false);
 
   const request = useCallback(async () => {
@@ -41,10 +43,10 @@ export function OnboardingOtpScreen() {
         setSent((count) => count + 1);
         setStatus(null);
       } else {
-        setStatus(statusFor(result.error));
+        setStatus(result.error);
       }
     } catch {
-      setStatus(statusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
     }
@@ -74,9 +76,9 @@ export function OnboardingOtpScreen() {
         navigate(paths.register.sim, { replace: true, state }); // Failure → AUTH-03 [S], D-41
         return;
       }
-      setStatus(statusFor(result.error));
+      setStatus(result.error);
     } catch {
-      setStatus(statusFor({ code: "UNKNOWN" }));
+      setStatus({ code: "UNKNOWN" });
     } finally {
       inFlight.current = false;
       setChecking(false);
@@ -84,7 +86,7 @@ export function OnboardingOtpScreen() {
   };
 
   return (
-    <AppShell variant="auth" header={<AppHeader title="Код из СМС" />}>
+    <AppShell variant="auth" header={<AppHeader title={t.onboardingOtp.title} />}>
       {delivery && (
         <OTPVerification
           key={sent}
@@ -96,8 +98,8 @@ export function OnboardingOtpScreen() {
           onResend={() => void request()}
         />
       )}
-      {status && <StatusMessage {...status} />}
-      {status && !delivery && <ActionButton action="retry" label="Отправить код" onPress={() => void request()} />}
+      {status && <StatusMessage {...statusFor(status, t)} />}
+      {status && !delivery && <ActionButton action="retry" label={t.otp.send} onPress={() => void request()} />}
     </AppShell>
   );
 }
