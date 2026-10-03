@@ -5,6 +5,14 @@ export type LoginFailure =
   | { target: "mpin"; message: string }
   | { target: "status"; kind: "error" | "unavailable"; title: string; description: string };
 
+/** The device did not confirm biometrics: a device state, not a banking error. The bank was not asked. */
+export const BIOMETRIC_NOT_VERIFIED: LoginFailure = {
+  target: "status",
+  kind: "error",
+  title: "Биометрия не подтверждена",
+  description: "Войдите по MPIN.",
+};
+
 /** Maps contract errors of `login` to UI state. Raw codes never reach the user. */
 export function loginFailure(error: ContractError): LoginFailure {
   switch (error.code) {
