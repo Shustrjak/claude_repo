@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import type { Result } from "../../adapters/banking/types";
 import { useAppSession } from "../../app/AppSessionContext";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
+import { useBiometricLoginPreference } from "../../app/BiometricLoginPreferenceContext";
 import { useDeviceCapability } from "../../app/DeviceCapabilityContext";
 import { paths } from "../../app/paths";
 import { AppHeader } from "../../components/global/AppHeader";
@@ -19,36 +20,43 @@ const METHODS: readonly AuthMethod[] = ["biometric", "mpin"];
 type Attempt = () => Promise<Result<void> | "device_not_verified">;
 
 /**
- * AUTH-01 Login: biometrics OR MPIN (N04, D-09, D-13). Biometrics come from the device boundary
- * (D-14, D-31); only BankingAdapter.login opens the session. Links to register and open an account.
+ * AUTH-01 Login: biometrics OR MPIN (N04, D-09, D-13). Biometrics are offered when enabled by the
+ * user and available on the device (D-33, D-31); only BankingAdapter.login opens the session. Links to register and open an account.
  */
 export function LoginScreen() {
   const adapter = useBankingAdapter();
   const device = useDeviceCapability();
+  const { biometricLoginEnabled } = useBiometricLoginPreference();
   const session = useAppSession();
   const navigate = useNavigate();
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [deviceBiometricAvailable, setDeviceBiometricAvailable] = useState(false);
   const [method, setMethod] = useState<AuthMethod>("mpin");
   const [submitting, setSubmitting] = useState(false);
   const [failure, setFailure] = useState<LoginFailure | null>(null);
   const [attempt, setAttempt] = useState(0);
   const inFlight = useRef(false);
 
+  // D-33: offer biometrics only if the user enabled them AND the device can do them.
+  const biometricOffered = biometricLoginEnabled && deviceBiometricAvailable;
+
   useEffect(() => {
+    if (!biometricLoginEnabled) {
+      return; // device support alone never turns biometric login on
+    }
     let active = true;
     device
       .isBiometricAvailable()
       .catch(() => false)
       .then((available) => {
         if (active && available) {
-          setBiometricAvailable(true);
-          setMethod("biometric"); // D-13: biometrics when available, MPIN as the fallback
+          setDeviceBiometricAvailable(true);
+          setMethod("biometric"); // D-13: biometrics when offered, MPIN as the fallback
         }
       });
     return () => {
       active = false;
     };
-  }, [device]);
+  }, [device, biometricLoginEnabled]);
 
   // One attempt at a time, whichever method started it.
   const authenticate = async (run: Attempt) => {
@@ -94,7 +102,7 @@ export function LoginScreen() {
       <AuthMethodSelector
         methods={METHODS}
         current={method}
-        biometricAvailable={biometricAvailable}
+        biometricAvailable={biometricOffered}
         disabled={submitting}
         onSelect={setMethod}
         onBiometricRequest={() => void loginWithBiometrics()}

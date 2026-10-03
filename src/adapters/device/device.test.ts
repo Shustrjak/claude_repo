@@ -9,6 +9,8 @@ import { NullDeviceAdapter } from "./NullDeviceAdapter";
 const DEVICE_METHODS = {
   isBiometricAvailable: true,
   verifyBiometric: true,
+  getSimCards: true,
+  bindSim: true,
 } as const satisfies Record<keyof DeviceCapabilityAdapter, true>;
 
 // Compile-time: the two boundaries share no operation.
@@ -61,6 +63,17 @@ for (const [name, create] of subjects) {
       expect(["verified", "not_verified"]).toContain(await device.verifyBiometric());
     });
 
+    it("lists SIM slots as { id, slot } only and binds only listed ones", async () => {
+      const device = create();
+      const sims = await device.getSimCards();
+      expect(new Set(sims.map((sim) => sim.id)).size).toBe(sims.length);
+      for (const sim of sims) {
+        expect(Object.keys(sim).sort()).toEqual(["id", "slot"]);
+        expect(["bound", "not_bound"]).toContain(await device.bindSim(sim.id));
+      }
+      expect(await device.bindSim("sim-unknown")).toBe("not_bound");
+    });
+
     it("never verifies biometrics it reports as unavailable", async () => {
       const device = create();
       if (!(await device.isBiometricAvailable())) {
@@ -73,6 +86,9 @@ for (const [name, create] of subjects) {
       const device = create();
       await device.isBiometricAvailable();
       await device.verifyBiometric();
+      for (const sim of await device.getSimCards()) {
+        await device.bindSim(sim.id);
+      }
       verifyUntouched();
     });
   });
@@ -101,10 +117,53 @@ describe("DemoDeviceAdapter", () => {
   });
 });
 
+describe("DemoDeviceAdapter SIM", () => {
+  it("offers no, one or two SIM slots as configured, the same on every call", async () => {
+    const expected = {
+      0: [],
+      1: [{ id: "sim-1", slot: 1 }],
+      2: [
+        { id: "sim-1", slot: 1 },
+        { id: "sim-2", slot: 2 },
+      ],
+    } as const;
+    for (const simCount of [0, 1, 2] as const) {
+      const device = new DemoDeviceAdapter({ simCount });
+      expect(await device.getSimCards()).toEqual(expected[simCount]);
+      expect(await device.getSimCards()).toEqual(expected[simCount]);
+    }
+  });
+
+  it("defaults to two SIM slots that bind", async () => {
+    const device = new DemoDeviceAdapter();
+    expect(await device.getSimCards()).toHaveLength(2);
+    expect(await device.bindSim("sim-2")).toBe("bound");
+  });
+
+  it("binds a listed SIM per configuration and never an unlisted one", async () => {
+    expect(await new DemoDeviceAdapter({ simBinding: "fails" }).bindSim("sim-1")).toBe("not_bound");
+    expect(await new DemoDeviceAdapter({ simCount: 1 }).bindSim("sim-2")).toBe("not_bound");
+    expect(await new DemoDeviceAdapter({ simCount: 0 }).bindSim("sim-1")).toBe("not_bound");
+  });
+
+  it("hands out copies, so callers cannot change its SIM list", async () => {
+    const device = new DemoDeviceAdapter({ simCount: 1 });
+    const [first] = await device.getSimCards();
+    if (first) first.slot = 9;
+    expect(await device.getSimCards()).toEqual([{ id: "sim-1", slot: 1 }]);
+  });
+});
+
 describe("NullDeviceAdapter", () => {
   it("reports biometrics unavailable and cannot fabricate a verification", async () => {
     const device = new NullDeviceAdapter();
     expect(await device.isBiometricAvailable()).toBe(false);
     expect(await device.verifyBiometric()).toBe("not_verified");
+  });
+
+  it("offers no SIM and binds nothing", async () => {
+    const device: DeviceCapabilityAdapter = new NullDeviceAdapter();
+    expect(await device.getSimCards()).toEqual([]);
+    expect(await device.bindSim("sim-1")).toBe("not_bound");
   });
 });

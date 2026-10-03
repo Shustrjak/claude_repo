@@ -3,6 +3,7 @@ import "@alfalab/core-components-vars/index.css";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import { AppSessionProvider } from "./app/AppSessionProvider";
+import { BiometricLoginPreferenceProvider } from "./app/BiometricLoginPreferenceProvider";
 import { BankingAdapterProvider } from "./app/BankingAdapterProvider";
 import { createBankingAdapter } from "./app/createBankingAdapter";
 import { createDeviceCapabilityAdapter } from "./app/createDeviceCapabilityAdapter";
@@ -22,9 +23,11 @@ createRoot(root).render(
   <StrictMode>
     <BankingAdapterProvider adapter={adapter}>
       <DeviceCapabilityProvider device={device}>
-        <AppSessionProvider>
-          <RouterProvider router={router} />
-        </AppSessionProvider>
+        <BiometricLoginPreferenceProvider>
+          <AppSessionProvider>
+            <RouterProvider router={router} />
+          </AppSessionProvider>
+        </BiometricLoginPreferenceProvider>
       </DeviceCapabilityProvider>
     </BankingAdapterProvider>
   </StrictMode>,

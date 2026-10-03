@@ -5,23 +5,34 @@ import type { DeviceCapabilityAdapter } from "../adapters/device/DeviceCapabilit
 import { NullDeviceAdapter } from "../adapters/device/NullDeviceAdapter";
 import { AppSessionProvider } from "../app/AppSessionProvider";
 import { BankingAdapterProvider } from "../app/BankingAdapterProvider";
+import { BiometricLoginPreferenceProvider } from "../app/BiometricLoginPreferenceProvider";
 import { DeviceCapabilityProvider } from "../app/DeviceCapabilityProvider";
 import { routes } from "../app/routes";
 
-type Options = { path?: string; authenticated?: boolean; device?: DeviceCapabilityAdapter };
+type Options = {
+  path?: string;
+  authenticated?: boolean;
+  device?: DeviceCapabilityAdapter;
+  biometricLoginEnabled?: boolean;
+};
 
-/** Renders the real routes with injected adapters, the way the composition root does. No device by default. */
+/**
+ * Renders the real routes with injected adapters and preference, the way the composition root
+ * does. Defaults: no device capabilities, biometric login not enabled.
+ */
 export function renderApp(
   adapter: BankingAdapter,
-  { path = "/", authenticated = false, device = new NullDeviceAdapter() }: Options = {},
+  { path = "/", authenticated = false, device = new NullDeviceAdapter(), biometricLoginEnabled = false }: Options = {},
 ) {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
   const view = render(
     <BankingAdapterProvider adapter={adapter}>
       <DeviceCapabilityProvider device={device}>
-        <AppSessionProvider initiallyAuthenticated={authenticated}>
-          <RouterProvider router={router} />
-        </AppSessionProvider>
+        <BiometricLoginPreferenceProvider initiallyEnabled={biometricLoginEnabled}>
+          <AppSessionProvider initiallyAuthenticated={authenticated}>
+            <RouterProvider router={router} />
+          </AppSessionProvider>
+        </BiometricLoginPreferenceProvider>
       </DeviceCapabilityProvider>
     </BankingAdapterProvider>,
   );

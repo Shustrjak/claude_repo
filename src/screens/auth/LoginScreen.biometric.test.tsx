@@ -25,7 +25,12 @@ function bankingWithLogin(login: (req: LoginRequest) => Promise<Result<void>>) {
 /** A device double: availability is fixed, every challenge resolves as scripted. */
 function scriptedDevice(verify: () => Promise<BiometricVerification>) {
   const verifySpy = vi.fn(verify);
-  const device: DeviceCapabilityAdapter = { isBiometricAvailable: async () => true, verifyBiometric: verifySpy };
+  const device: DeviceCapabilityAdapter = {
+    isBiometricAvailable: async () => true,
+    verifyBiometric: verifySpy,
+    getSimCards: async () => [],
+    bindSim: async () => "not_bound",
+  };
   return { device, verify: verifySpy };
 }
 
@@ -45,7 +50,7 @@ describe("AUTH-01 biometric login", () => {
     for (const device of [new NullDeviceAdapter(), new DemoDeviceAdapter({ biometric: "unavailable" })]) {
       const user = userEvent.setup();
       const { adapter, login } = bankingWithLogin(async () => ok());
-      const { router, unmount } = renderApp(adapter, { path: "/login", device });
+      const { router, unmount } = renderApp(adapter, { path: "/login", device, biometricLoginEnabled: true });
       await act(async () => undefined); // let the availability check settle
       expect(screen.queryByRole("button", BIOMETRIC)).toBeNull();
       await typeMpin(user, "1234");
@@ -59,7 +64,7 @@ describe("AUTH-01 biometric login", () => {
     const user = userEvent.setup();
     const { adapter, login } = bankingWithLogin(async () => ok());
     const { device, verify } = scriptedDevice(async () => "verified");
-    const { router } = renderApp(adapter, { path: "/login", device });
+    const { router } = renderApp(adapter, { path: "/login", device, biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     expect(verify).toHaveBeenCalledOnce();
     expect(login).toHaveBeenCalledExactlyOnceWith({ method: "biometric" });
@@ -69,7 +74,7 @@ describe("AUTH-01 biometric login", () => {
   it("does not ask the bank when the device does not verify, and falls back to MPIN", async () => {
     const user = userEvent.setup();
     const { adapter, login } = bankingWithLogin(async () => ok());
-    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter({ biometric: "rejects" }) });
+    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter({ biometric: "rejects" }), biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     expect(login).not.toHaveBeenCalled();
     expect((await screen.findByRole("alert")).textContent).toContain("Биометрия не подтверждена");
@@ -85,7 +90,7 @@ describe("AUTH-01 biometric login", () => {
     const { device } = scriptedDevice(async () => {
       throw new Error("sensor");
     });
-    renderApp(adapter, { path: "/login", device });
+    renderApp(adapter, { path: "/login", device, biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     expect(login).not.toHaveBeenCalled();
     expect((await screen.findByRole("alert")).textContent).not.toContain("sensor");
@@ -94,7 +99,7 @@ describe("AUTH-01 biometric login", () => {
   it("keeps the session closed when the bank rejects a verified biometric login", async () => {
     const user = userEvent.setup();
     const { adapter } = bankingWithLogin(async () => fail("STATE_CONFLICT"));
-    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter() });
+    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter(), biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     expect((await screen.findByRole("alert")).textContent).toContain("На этом устройстве нет регистрации");
     await act(() => router.navigate("/home"));
@@ -111,7 +116,7 @@ describe("AUTH-01 biometric login", () => {
         }),
     );
     const { adapter, login } = bankingWithLogin(async () => ok());
-    renderApp(adapter, { path: "/login", device });
+    renderApp(adapter, { path: "/login", device, biometricLoginEnabled: true });
     const biometric = await screen.findByRole("button", BIOMETRIC);
     await user.click(biometric);
     await user.click(biometric);
@@ -125,7 +130,7 @@ describe("AUTH-01 biometric login", () => {
   it("persists nothing about biometrics in browser storage", async () => {
     const user = userEvent.setup();
     const { adapter } = bankingWithLogin(async () => ok());
-    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter() });
+    const { router } = renderApp(adapter, { path: "/login", device: new DemoDeviceAdapter(), biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     await expectHome(router);
     expect(window.localStorage.length).toBe(0);
@@ -138,14 +143,14 @@ describe("Banking and device boundaries are independent", () => {
 
   it("Demo banking + Demo device: biometric login reaches Home", async () => {
     const user = userEvent.setup();
-    const { router } = renderApp(demoBanking(), { path: "/login", device: new DemoDeviceAdapter() });
+    const { router } = renderApp(demoBanking(), { path: "/login", device: new DemoDeviceAdapter(), biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     await expectHome(router);
   });
 
   it("Demo banking + Null device: MPIN only, and MPIN reaches Home", async () => {
     const user = userEvent.setup();
-    const { router } = renderApp(demoBanking(), { path: "/login", device: new NullDeviceAdapter() });
+    const { router } = renderApp(demoBanking(), { path: "/login", device: new NullDeviceAdapter(), biometricLoginEnabled: true });
     await act(async () => undefined);
     expect(screen.queryByRole("button", BIOMETRIC)).toBeNull();
     await typeMpin(user, "1234");
@@ -154,9 +159,43 @@ describe("Banking and device boundaries are independent", () => {
 
   it("Null banking + Demo device: the device verifies, the bank is unavailable, no session", async () => {
     const user = userEvent.setup();
-    const { router } = renderApp(new NullAdapter(), { path: "/login", device: new DemoDeviceAdapter() });
+    const { router } = renderApp(new NullAdapter(), { path: "/login", device: new DemoDeviceAdapter(), biometricLoginEnabled: true });
     await user.click(await screen.findByRole("button", BIOMETRIC));
     expect((await screen.findByRole("alert")).textContent).toContain("Банк сейчас недоступен");
     expect(router.state.location.pathname).toBe("/login");
+  });
+});
+
+describe("D-33: biometric login needs device support AND the user's preference", () => {
+  const cases = [
+    ["device available, preference off", new DemoDeviceAdapter(), false, false],
+    ["device unavailable, preference on", new DemoDeviceAdapter({ biometric: "unavailable" }), true, false],
+    ["no device capabilities, preference on", new NullDeviceAdapter(), true, false],
+    ["device available, preference on", new DemoDeviceAdapter(), true, true],
+  ] as const;
+
+  for (const [label, device, biometricLoginEnabled, offered] of cases) {
+    it(`${label}: biometric login ${offered ? "is" : "is not"} offered, MPIN stays reachable`, async () => {
+      const user = userEvent.setup();
+      const { adapter, login } = bankingWithLogin(async () => ok());
+      const { router } = renderApp(adapter, { path: "/login", device, biometricLoginEnabled });
+      await act(async () => undefined); // let the availability check settle
+      expect(screen.queryByRole("button", BIOMETRIC) !== null).toBe(offered);
+      if (offered) {
+        await user.click(screen.getByRole("button", { name: "Войти по MPIN" }));
+      }
+      await typeMpin(user, "1234");
+      expect(login).toHaveBeenCalledExactlyOnceWith({ method: "mpin", mpin: "1234" });
+      await expectHome(router);
+    });
+  }
+
+  it("does not even ask the device while the preference is off", async () => {
+    const isBiometricAvailable = vi.fn(async () => true);
+    const { device: scripted } = scriptedDevice(async () => "verified");
+    const device: DeviceCapabilityAdapter = { ...scripted, isBiometricAvailable };
+    renderApp(bankingWithLogin(async () => ok()).adapter, { path: "/login", device });
+    await act(async () => undefined);
+    expect(isBiometricAvailable).not.toHaveBeenCalled();
   });
 });
