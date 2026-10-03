@@ -27,7 +27,7 @@ DemoAdapter | NullAdapter | FutureRealBankAdapter (в задаче — RealBankA
 | Метка | Значение |
 |---|---|
 | `[SOURCE]` | Явный источник: схема R38 ([`refs/R38-user-flow.jpg`](../../refs/R38-user-flow.jpg)) |
-| `[DECISION]` | Утверждённое решение D-01…D-26 |
+| `[DECISION]` | Утверждённое решение D-01…D-27 |
 | `[SCREEN]` | Утверждённый экран, его композиция или вход семантического компонента без метки `[A]` |
 | `[FLOW]` | Утверждённый пользовательский флоу |
 | `[TECHNICAL]` | Строго необходимое техническое поле. Обоснование указано всегда; продуктовую функциональность так не вводим |
@@ -606,7 +606,8 @@ interface BankingAdapter {
 | `getTransferLimits`, `getSbpDefaultBank`, `getLanguageSettings` | `UNAVAILABLE` (пустого значения нет, G-6) | Демо-данные из JSON | Запрос к банку |
 | Остальные действия | `UNAVAILABLE` | Имитация по демо-правилам | Запрос к банку |
 
-- Где `DemoAdapter` хранит изменения, пока не решено: вопрос 3 в ROADMAP.
+- `DemoAdapter` хранит изменения в `localStorage` браузера; интерфейс об этом не знает, `NullAdapter` ничего не хранит [D-27].
+- Реализация: `src/adapters/banking/` — интерфейс, `NullAdapter`, `DemoAdapter` и общие контрактные тесты.
 - Выбор адаптера — в одном месте конфигурации.
 
 ---
@@ -663,6 +664,7 @@ interface BankingAdapter {
 | ~~CQ-07~~ | ~~Чьи операции показывает мини-выписка при нескольких счетах~~ | Решено — D-23: одного конкретного счёта | — | `getRecentTransactions` требует `accountId` |
 | ~~CQ-08~~ | ~~С какого счёта списывается перевод~~ | Решено — D-24: с одного конкретного счёта, поле обязательно | — | `TransferRequest.sourceAccountId` |
 | ~~CQ-09~~ | ~~Значения `AccountSummary.status`~~ | Решено — D-25: `active` \| `blocked`; `blocked` нельзя указать счётом списания | — | `AccountStatus`; `STATE_CONFLICT` в `confirmTransfer` |
+| CQ-10 | Вызов не по порядку флоу B: `sendEmailCode` до `startRegistration`, `setMpin` до `submitPersonalDetails`, `requestOtp({ purpose: "onboarding" })` до `setMpin`. В списках ошибок этих операций нет `STATE_CONFLICT`, хотя по разделу 4 это его случай («нарушен порядок шагов»). `DemoAdapter` сейчас отвечает `STATE_CONFLICT`. Дописать его в списки ошибок? | NEEDS_DECISION | Нет: `STATE_CONFLICT` уже есть в `ErrorCode`, меняется только документация | `DemoAdapter` отвечает `STATE_CONFLICT` |
 | Q-17 | Какие языки интерфейса | OPEN | Нет | Структура есть, значения не заданы |
 
 Вопросы Q-10, Q-11 и Q-16 из UI-спецификации остаются открытыми: Q-10 и Q-16 контракт не затрагивают, Q-11 исключён целиком.

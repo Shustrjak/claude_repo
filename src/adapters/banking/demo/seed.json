@@ -1,0 +1,62 @@
+{
+  "customer": {
+    "phone": "+79990000001",
+    "mpin": "1234"
+  },
+  "accounts": [
+    {
+      "id": "acc-1",
+      "name": "Счёт для покупок",
+      "maskedNumber": "•• 4021",
+      "balance": { "amount": 12500000, "currency": "RUB" },
+      "status": "active"
+    },
+    {
+      "id": "acc-2",
+      "name": "Счёт для поездок",
+      "maskedNumber": "•• 7713",
+      "balance": { "amount": 3480050, "currency": "RUB" },
+      "status": "active"
+    },
+    {
+      "id": "acc-3",
+      "name": "Старый счёт",
+      "maskedNumber": "•• 0598",
+      "balance": { "amount": 500000, "currency": "RUB" },
+      "status": "blocked"
+    }
+  ],
+  "transactions": [
+    { "id": "tx-1", "accountId": "acc-1", "title": "Продукты", "date": "2026-09-28T18:42:00Z", "amount": { "amount": -245090, "currency": "RUB" }, "status": "success" },
+    { "id": "tx-2", "accountId": "acc-1", "title": "Зарплата", "date": "2026-09-25T09:00:00Z", "amount": { "amount": 8500000, "currency": "RUB" }, "status": "success" },
+    { "id": "tx-3", "accountId": "acc-1", "title": "Кафе", "date": "2026-09-24T13:15:00Z", "amount": { "amount": -68000, "currency": "RUB" }, "status": "pending" },
+    { "id": "tx-4", "accountId": "acc-2", "title": "Билеты на поезд", "date": "2026-09-20T07:30:00Z", "amount": { "amount": -412000, "currency": "RUB" }, "status": "success" },
+    { "id": "tx-5", "accountId": "acc-2", "title": "Отель", "date": "2026-09-19T21:05:00Z", "amount": { "amount": -950000, "currency": "RUB" }, "status": "failure" },
+    { "id": "tx-6", "accountId": "acc-3", "title": "Пополнение", "date": "2026-08-01T10:00:00Z", "amount": { "amount": 500000, "currency": "RUB" }, "status": "success" }
+  ],
+  "banks": [
+    { "id": "bank-north", "name": "Банк Север" },
+    { "id": "bank-south", "name": "Банк Юг" },
+    { "id": "bank-east", "name": "Банк Восток" }
+  ],
+  "phoneDirectory": {
+    "+79990000002": ["bank-north", "bank-south"],
+    "+79990000003": ["bank-east"]
+  },
+  "limits": {
+    "mobile": { "min": { "amount": 100, "currency": "RUB" }, "max": { "amount": 10000000, "currency": "RUB" } },
+    "bankAccount": { "min": { "amount": 100, "currency": "RUB" }, "max": { "amount": 50000000, "currency": "RUB" } }
+  },
+  "languages": [
+    { "code": "ru", "title": "Русский" },
+    { "code": "en", "title": "English" }
+  ],
+  "language": "ru",
+  "sbpDefaultBank": false,
+  "codes": {
+    "otp": "123456",
+    "email": "123456",
+    "length": 6,
+    "resendAfterSec": 60
+  }
+}
