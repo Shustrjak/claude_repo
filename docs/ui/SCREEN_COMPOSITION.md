@@ -211,7 +211,8 @@ AppShell(main)
 
 ```
 PAY-06 Pay to Bank Account
-  то же, что PAY-04, но PaymentForm(recipientType=bankAccount): номер счёта и БИК [D-01]
+  то же, что PAY-04, но PaymentForm(recipientType=bankAccount): номер счёта и БИК [D-01],
+  имя получателя — Input внутри RecipientInput(type=bankAccount), обязательно [D-26]
   остаётся в разделе СБП [D-06]
 ```
 

@@ -27,7 +27,7 @@ DemoAdapter | NullAdapter | FutureRealBankAdapter (в задаче — RealBankA
 | Метка | Значение |
 |---|---|
 | `[SOURCE]` | Явный источник: схема R38 ([`refs/R38-user-flow.jpg`](../../refs/R38-user-flow.jpg)) |
-| `[DECISION]` | Утверждённое решение D-01…D-25 |
+| `[DECISION]` | Утверждённое решение D-01…D-26 |
 | `[SCREEN]` | Утверждённый экран, его композиция или вход семантического компонента без метки `[A]` |
 | `[FLOW]` | Утверждённый пользовательский флоу |
 | `[TECHNICAL]` | Строго необходимое техническое поле. Обоснование указано всегда; продуктовую функциональность так не вводим |
@@ -83,7 +83,7 @@ type CodeDelivery = { destinationMasked: string; codeLength: number; resendAfter
 |---|---|---|
 | `Result` | Успех с данными или ошибка | `[TECHNICAL]` единый способ вернуть ошибку; нужен `AsyncContent` и `StatusMessage` для состояний `error` и `unavailable` |
 | `ContractError.code` | Код ошибки ([раздел 4](#4-ошибки)) | `[SCREEN]` состояния ошибок экранов, `StatusMessage(error / unavailable)` |
-| `ContractError.fields` | Поля запроса, не прошедшие проверку | `[TECHNICAL]` показать ошибку у нужного поля формы: AUTH-05, `PaymentForm` |
+| `ContractError.fields` | Поля запроса, не прошедшие проверку | `[TECHNICAL]` показать ошибку у нужного поля формы: AUTH-05, `PaymentForm`; вложенное поле — путь через точку, например `recipient.recipientName` |
 | `Money.amount` | Целые копейки; у операций со знаком | `[SCREEN]` `AccountCard.balance`, `TransactionRow.amount` «со знаком», `PaymentForm`; `[TECHNICAL]` целые копейки — без ошибок округления |
 | `Money.currency` | Только `"RUB"` | `[SCREEN]` `PaymentForm.currency`, `AccountCard.balance` «сумма и валюта»; `[DECISION]` D-01 (Россия, СБП) |
 | `CodeDelivery.destinationMasked` | Куда отправлен код, в замаскированном виде | `[SCREEN]` `OTPVerification.destination` |
@@ -387,7 +387,7 @@ type TransferLimits = { min: Money; max: Money };
 
 Ошибки: `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
-#### `confirmTransfer` — подтвердить перевод · `NEEDS_DECISION · CQ-06`; также CQ-01, CQ-04
+#### `confirmTransfer` — подтвердить перевод · `STABLE · CQ-01, CQ-04`
 
 ```ts
 confirmTransfer(req: TransferRequest): Promise<Result<TransferResult>>
@@ -397,7 +397,7 @@ type TransferRequest = {
   sourceAccountId: string;
   recipient:
     | { method: "mobile"; phone: string; bankId: string }
-    | { method: "bankAccount"; accountNumber: string; bik: string };
+    | { method: "bankAccount"; accountNumber: string; bik: string; recipientName: string };
   amount: Money;
   comment?: string;
   confirmation: { method: "biometric" } | { method: "mpin"; mpin: string };
@@ -414,6 +414,7 @@ type TransferResult = { status: "success" | "pending" };
 | `recipient.bankId` | строка из `findRecipientBanks` | при `mobile` | `[SCREEN]` `RecipientInput.onBankChange(bankId)`; `[DECISION]` D-06 |
 | `recipient.accountNumber` | 20 цифр | при `bankAccount` | `[SCREEN]` PAY-06; `[DECISION]` D-01 «номер счёта» |
 | `recipient.bik` | 9 цифр | при `bankAccount` | `[SCREEN]` PAY-06; `[DECISION]` D-01 «БИК» |
+| `recipient.recipientName` | непустая строка | при `bankAccount` | `[DECISION]` D-26 — имя получателя при переводе по реквизитам; `[SCREEN]` PAY-06 `RecipientInput(bankAccount)` → `Input` |
 | `amount` | `Money` | да | `[SCREEN]` `PaymentForm` → `AmountInput`; `PaymentSummary.amount` |
 | `comment` | строка | `NEEDS_DECISION · CQ-01` | `[SCREEN]` `PaymentForm` → `Input(комментарий)`; `PaymentSummary.comment` |
 | `confirmation.method` | `"biometric" \| "mpin"` | да | `[DECISION]` D-13 — биометрия ИЛИ MPIN, не оба |
@@ -427,7 +428,8 @@ type TransferResult = { status: "success" | "pending" };
 - Неизвестный или чужой `sourceAccountId` — `VALIDATION_FAILED` с `fields: ["sourceAccountId"]`.
 - Счёт со статусом `blocked` — `STATE_CONFLICT` с `fields: ["sourceAccountId"]` `[DECISION]` D-25. Проверяет адаптер (G-2). Флоу заранее не считает такой счёт допустимым, но окончательная проверка — у адаптера.
 - `comment` остаётся `comment?: string` при любом ответе на CQ-01: если комментарий станет обязательным, отсутствие — `VALIDATION_FAILED`.
-- **Блокер CQ-06.** Если ФИО получателя при переводе по реквизитам окажется обязательным, в `recipient` для `bankAccount` появится обязательное поле. Поэтому статус операции — `NEEDS_DECISION`.
+- **Имя получателя при `bankAccount` обязательно** `[DECISION]` D-26. Это одна строка в том виде, в каком её ввёл пользователь. Банк имя не сверяет: проверки по документам, разбора на фамилию, имя и отчество, транслитерации, исправлений и типов получателя (физлицо, организация) в v1 нет. Для `mobile` имя не передаётся.
+- Пустое или отсутствующее `recipientName` — `VALIDATION_FAILED` с `fields: ["recipient.recipientName"]`. Ограничений длины контракт не задаёт: источника для них нет.
 - `failure` на PST-02 — это `ok: false` с кодом ошибки.
 - Ошибки: `MPIN_INVALID`, `AMOUNT_OUT_OF_LIMITS`, `INSUFFICIENT_FUNDS`, `RECIPIENT_NOT_FOUND`, `VALIDATION_FAILED`, `STATE_CONFLICT`, `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
@@ -528,7 +530,7 @@ setLanguage(req: { code: string }): Promise<Result<void>>
 | `getAccounts` | G | HOME-01; PAY-04, PAY-06 / C, G | — | `AccountSummary[]` | DECISION D-07, D-21, D-22, D-24, D-25; SCREEN `AccountCard` | `getAccounts` | STABLE |
 | `getRecentTransactions` | H | ACC-02 / G | `{ accountId, limit }` | `Transaction[]` | SOURCE N20; SCREEN ACC-02; DECISION D-23 | `getRecentTransactions` | STABLE |
 | `getTransferLimits` | I | PAY-04, PAY-06 / C | `{ method }` | `TransferLimits` | SCREEN `PaymentForm.limits` | `getTransferLimits` | STABLE |
-| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13, D-24, D-25 | `confirmTransfer` | NEEDS_DECISION · CQ-06; также CQ-01, CQ-04 |
+| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13, D-24, D-25, D-26 | `confirmTransfer` | STABLE · CQ-01, CQ-04 |
 | `findRecipientBanks` | J | PAY-04 / C, D | `{ phone }` | `Bank[]` | DECISION D-06 | `findRecipientBanks` | STABLE |
 | `getSbpDefaultBank` | J | SBP-03 / D | — | `{ isDefault }` | SOURCE N16; DECISION D-06, D-17 | `getSbpDefaultBank` | STABLE |
 | `setSbpDefaultBank` | J | SBP-03 / D | — | — | DECISION D-06, D-08, D-17 | `setSbpDefaultBank` | STABLE · CQ-05 |
@@ -541,6 +543,16 @@ setLanguage(req: { code: string }): Promise<Result<void>>
 |---|---|---|---|
 | `card.number`, `card.expiry` | Обязательны | Запрещены (`STATE_CONFLICT`) | DECISION D-15, D-18 |
 | Остальные поля `PersonalDetails` | Те же | Те же | DECISION D-15, D-19 |
+
+**Условные поля перевода** (`recipient` — размеченное объединение по `method`):
+
+| Поле | `mobile` (PAY-04) | `bankAccount` (PAY-06) | Происхождение |
+|---|---|---|---|
+| `recipient.phone`, `recipient.bankId` | Обязательны | Нет в варианте | DECISION D-06 |
+| `recipient.accountNumber`, `recipient.bik` | Нет в варианте | Обязательны | DECISION D-01 |
+| `recipient.recipientName` | Нет в варианте | Обязательно, непустое | DECISION D-26 |
+
+Цепочка для имени получателя: PAY-06 → `RecipientInput(bankAccount)` → `Input` (имя получателя) → `recipient: { method: "bankAccount", accountNumber, bik, recipientName }` → `TransferRequest` → `confirmTransfer` → `BankingAdapter.confirmTransfer` [D-26]. Отдельной операции для имени нет.
 
 **Экраны без операций:**
 - AUTH-03, AUTH-04, SET-03 — граница устройства;
@@ -590,7 +602,7 @@ interface BankingAdapter {
 |---|---|---|---|
 | `getAccounts`, `findRecipientBanks` | `[]` | Демо-данные из JSON; у `getAccounts` — ноль, один или несколько счетов | Запрос к банку |
 | `getRecentTransactions` | `[]` при любом `accountId`: счетов нет, операций тоже (G-6) | Демо-операции только этого счёта; неизвестный `accountId` — `VALIDATION_FAILED` | Запрос к банку |
-| `confirmTransfer` | `UNAVAILABLE`; счёт списания не подставляет и не придумывает | Принимает только `sourceAccountId` демо-счёта, иначе `VALIDATION_FAILED`; демо-счёт `blocked` — `STATE_CONFLICT` [D-25]; остальное — по демо-правилам, без сложной банковской логики | Запрос к банку |
+| `confirmTransfer` | `UNAVAILABLE`; счёт списания не подставляет и не придумывает | Принимает только `sourceAccountId` демо-счёта, иначе `VALIDATION_FAILED`; демо-счёт `blocked` — `STATE_CONFLICT` [D-25]; пустое `recipientName` при `bankAccount` — `VALIDATION_FAILED` [D-26]; остальное — по демо-правилам, без сложной банковской логики | Запрос к банку |
 | `getTransferLimits`, `getSbpDefaultBank`, `getLanguageSettings` | `UNAVAILABLE` (пустого значения нет, G-6) | Демо-данные из JSON | Запрос к банку |
 | Остальные действия | `UNAVAILABLE` | Имитация по демо-правилам | Запрос к банку |
 
@@ -630,7 +642,7 @@ interface BankingAdapter {
 | Шаблоны, избранное, регулярные и отложенные платежи, история платежей | Нигде не утверждены | — |
 
 **Поля из предложений `[A]`, которые не вошли:**
-- имя получателя (`RecipientInput.resolvedName`);
+- имя получателя, найденное банком (`RecipientInput.resolvedName`). Это не то же, что введённое пользователем `recipientName` [D-26];
 - комиссия и итог (`PaymentSummary.fee`, `total`);
 - категория операции (`TransactionRow.category`).
 
@@ -638,7 +650,7 @@ interface BankingAdapter {
 
 ## 10. Открытые вопросы контракта
 
-Открытые вопросы, кроме CQ-06, не меняют существующие обязательные сигнатуры: ответы могут только добавить необязательное поле, операцию или поменять проверку. Ответ на CQ-06 может добавить обязательное поле в `confirmTransfer`.
+Ни один открытый вопрос не меняет существующие обязательные сигнатуры: ответы могут только добавить необязательное поле или операцию либо поменять проверку. Обязательные сигнатуры всех 19 операций заморожены.
 
 | № | Вопрос | Статус | Блокирует v1? | Сейчас в контракте |
 |---|---|---|---|---|
@@ -647,7 +659,7 @@ interface BankingAdapter {
 | ~~CQ-03~~ | ~~Сколько счетов у клиента~~ | Решено — D-22: может быть несколько | — | `getAccounts` возвращает список |
 | CQ-04 | Что дальше, если перевод «в обработке» (`pending`)? Уточнения статуса в UI нет | NEEDS_DECISION | Нет: ответ может только добавить операцию; перевод уже можно назвать по `clientRequestId` | `pending` — конечный ответ для PST-02 |
 | CQ-05 | Можно ли снять настройку «банк по умолчанию»? | NEEDS_DECISION | Нет: ответ может только добавить операцию | Только `setSbpDefaultBank` |
-| CQ-06 | Нужно ли ФИО получателя при переводе по реквизитам? В UI его нет | NEEDS_DECISION | **Да, `confirmTransfer`:** если ФИО обязательно, в `recipient` для `bankAccount` добавится обязательное поле, а на PAY-06 — поле ввода | Не передаётся |
+| ~~CQ-06~~ | ~~Нужно ли имя получателя при переводе по реквизитам~~ | Решено — D-26: да, одной строкой, только для `bankAccount` | — | `recipient.recipientName` |
 | ~~CQ-07~~ | ~~Чьи операции показывает мини-выписка при нескольких счетах~~ | Решено — D-23: одного конкретного счёта | — | `getRecentTransactions` требует `accountId` |
 | ~~CQ-08~~ | ~~С какого счёта списывается перевод~~ | Решено — D-24: с одного конкретного счёта, поле обязательно | — | `TransferRequest.sourceAccountId` |
 | ~~CQ-09~~ | ~~Значения `AccountSummary.status`~~ | Решено — D-25: `active` \| `blocked`; `blocked` нельзя указать счётом списания | — | `AccountStatus`; `STATE_CONFLICT` в `confirmTransfer` |
@@ -668,4 +680,5 @@ interface BankingAdapter {
 - **Поправка после D-23 и D-24:** `getRecentTransactions` получила обязательный `accountId`; в `TransferRequest` добавлено обязательное `sourceAccountId`. Оба поля — `AccountSummary.id`, другого идентификатора счёта нет. Вопросы CQ-07 и CQ-08 закрыты. Добавлен CQ-09: значения `AccountSummary.status` пришли из предложения `[A]`, а `[A]` в контракт не попадает, поэтому `getAccounts` переведена в `NEEDS_DECISION · CQ-09`.
 - **Поправка после D-25:** утверждён `AccountStatus = "active" | "blocked"`; единственное следствие `blocked` — нельзя указать счётом списания, `confirmTransfer` отвечает `STATE_CONFLICT`. `getAccounts` снова `STABLE`, CQ-09 закрыт.
 - **Аудит перед заморозкой:** у CQ-06 исправлена оценка — ответ может добавить обязательное поле, поэтому `confirmTransfer` — `NEEDS_DECISION · CQ-06`. Для CQ-01 зафиксированы типы полей, чтобы ответ менял только проверку.
+- **Поправка после D-26:** в вариант `bankAccount` поля `recipient` добавлено обязательное `recipientName: string`; на PAY-06 — поле ввода. CQ-06 закрыт, `confirmTransfer` — `STABLE · CQ-01, CQ-04`. Добавлена таблица условных полей перевода. Для вложенных полей в `fields` введена запись через точку. Обязательные сигнатуры всех 19 операций заморожены.
 - Названия операций не менялись.
