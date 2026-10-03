@@ -139,11 +139,16 @@ describe("AUTH-01 Login", () => {
     expect(router.state.location.search + router.state.location.hash).not.toContain("1234");
   });
 
-  it("keeps the register and open-account intents visible but unavailable", () => {
-    renderApp(adapterWithLogin(async () => ok()).adapter, { path: "/login" });
-    for (const name of ["Открыть счёт", "Зарегистрироваться"]) {
-      expect(screen.getByRole("button", { name }).hasAttribute("disabled")).toBe(true);
-    }
+  it("leads «Открыть счёт» to ACC-07 and «Зарегистрироваться» to AUTH-02", async () => {
+    const user = userEvent.setup();
+    const first = renderApp(adapterWithLogin(async () => ok()).adapter, { path: "/login" });
+    await user.click(screen.getByRole("button", { name: "Открыть счёт" }));
+    expect(first.router.state.location.pathname).toBe("/open-account");
+    first.unmount();
+    const second = renderApp(adapterWithLogin(async () => ok()).adapter, { path: "/login" });
+    await user.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
+    expect(second.router.state.location.pathname).toBe("/register/phone");
+    expect(second.router.state.location.state).toEqual({ onboardingContext: "existing_customer" });
   });
 
   it("offers MPIN only while the device boundary reports no biometrics", () => {

@@ -6,6 +6,7 @@ import { useBankingAdapter } from "../../app/BankingAdapterContext";
 import { useBiometricLoginPreference } from "../../app/BiometricLoginPreferenceContext";
 import { useDeviceCapability } from "../../app/DeviceCapabilityContext";
 import { paths } from "../../app/paths";
+import type { RegistrationEntryState } from "../../app/registration/RegistrationFlowLayout";
 import { AppHeader } from "../../components/global/AppHeader";
 import { AppShell } from "../../components/global/AppShell";
 import { AuthMethodSelector, type AuthMethod } from "../../components/semantic/AuthMethodSelector";
@@ -16,12 +17,16 @@ import { BIOMETRIC_NOT_VERIFIED, loginFailure, type LoginFailure } from "./login
 
 const METHODS: readonly AuthMethod[] = ["biometric", "mpin"];
 
+/** D-16: «Зарегистрироваться» is for someone who is already a client of the bank. */
+const EXISTING_CUSTOMER: RegistrationEntryState = { onboardingContext: "existing_customer" };
+
 /** A login attempt either reaches the bank or stops on the device. */
 type Attempt = () => Promise<Result<void> | "device_not_verified">;
 
 /**
  * AUTH-01 Login: biometrics OR MPIN (N04, D-09, D-13). Biometrics are offered when enabled by the
- * user and available on the device (D-33, D-31); only BankingAdapter.login opens the session. Links to register and open an account.
+ * user and available on the device (D-33, D-31); only BankingAdapter.login opens the session.
+ * «Открыть счёт» → ACC-07 (D-08), «Зарегистрироваться» → AUTH-02 as `existing_customer` (D-16, D-18). Links to register and open an account.
  */
 export function LoginScreen() {
   const adapter = useBankingAdapter();
@@ -118,9 +123,13 @@ export function LoginScreen() {
       {failure?.target === "status" && (
         <StatusMessage kind={failure.kind} title={failure.title} description={failure.description} />
       )}
-      {/* AUTH-02 and ACC-07 are not implemented yet: the intents stay visible but unavailable. */}
-      <ListRow variant="link" title="Открыть счёт" disabled />
-      <ListRow variant="link" title="Зарегистрироваться" disabled />
+      <ListRow variant="link" title="Открыть счёт" disabled={submitting} onPress={() => navigate(paths.openAccount)} />
+      <ListRow
+        variant="link"
+        title="Зарегистрироваться"
+        disabled={submitting}
+        onPress={() => navigate(paths.register.phone, { state: EXISTING_CUSTOMER })}
+      />
     </AppShell>
   );
 }

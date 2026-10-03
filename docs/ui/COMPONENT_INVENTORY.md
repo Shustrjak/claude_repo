@@ -25,7 +25,7 @@
 | `Button` | `button` | Основа для `ActionButton` |
 | `IconButton` | `icon-button` | Кнопки в шапке: назад, поиск, уведомления |
 | `Input` | `input` | Текстовые поля: комментарий, номер счёта, БИК; поля регистрации в AUTH-05 [D-15], даты — с маской |
-| `PhoneInput` | `intl-phone-input` | AUTH-02 [D-15], PAY-04 |
+| `PhoneInput` | `phone-input` | AUTH-02 [D-15], PAY-04. Только российские номера (+7), поэтому маскированный ввод, а не `intl-phone-input` с выбором страны [D-39] |
 | `AmountInput` | `amount-input` | Сумма платежа |
 | `Money` | `amount` | Отображение суммы и баланса с валютой |
 | `CodeInput` | `code-input` | Ввод OTP-кода (в задаче назывался OTPInput) |
@@ -73,7 +73,7 @@
 
 ## Слой B — семантические компоненты
 
-**В коде** [D-30]: примитивы — `src/components/primitives.ts` (реэкспорт пакетов Alfa); `MPINInput`, `AuthMethodSelector`, `ListRow` (пока только `link`), `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
+**В коде** [D-30, D-39]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `ListRow` (`link`, `toggle`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад») — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
 
 Подробно — в [SEMANTIC_COMPONENTS.md](SEMANTIC_COMPONENTS.md).
 

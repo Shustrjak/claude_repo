@@ -2,8 +2,8 @@ import { createContext, useContext } from "react";
 
 /**
  * The user's choice to log in with biometrics in this app (D-33). An application preference,
- * not a device capability: AUTH-06 and SET-03 will set it, AUTH-01 reads it. Off by default.
- * Kept in memory for now; whether it survives a reload, and where, is Q-34.
+ * not a device capability: AUTH-06 sets it at registration, SET-03 will toggle it, AUTH-01 reads
+ * it. Off by default and kept across reloads in its own storage record (D-35).
  */
 export type BiometricLoginPreference = {
   biometricLoginEnabled: boolean;

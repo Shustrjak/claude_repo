@@ -1,0 +1,25 @@
+import { useNavigate } from "react-router";
+import { paths } from "../../app/paths";
+import type { RegistrationEntryState } from "../../app/registration/RegistrationFlowLayout";
+import { AppHeader } from "../../components/global/AppHeader";
+import { AppShell } from "../../components/global/AppShell";
+import { ActionButton } from "../../components/semantic/ActionButton";
+import { ListRow } from "../../components/semantic/ListRow";
+
+const NEW_CUSTOMER: RegistrationEntryState = { onboardingContext: "new_customer" };
+
+/**
+ * ACC-07 Open Account: only the entry into registration for someone who is not yet a client
+ * (D-08, D-18). No product is opened; the three account types are disabled navigation items (D-11).
+ */
+export function OpenAccountScreen() {
+  const navigate = useNavigate();
+  return (
+    <AppShell variant="auth" header={<AppHeader title="Открыть счёт" onBack={() => navigate(paths.login)} />}>
+      <ListRow variant="link" title="Сберегательный счёт" disabled />
+      <ListRow variant="link" title="Текущий счёт" disabled />
+      <ListRow variant="link" title="Кредиты" disabled />
+      <ActionButton action="next" onPress={() => navigate(paths.register.phone, { state: NEW_CUSTOMER })} />
+    </AppShell>
+  );
+}
