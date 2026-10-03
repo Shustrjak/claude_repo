@@ -481,7 +481,7 @@ setSbpDefaultBank(): Promise<Result<void>>
 
 Смена MPIN — в разделе F. Включение биометрии (SET-03) — граница устройства.
 
-#### `getLanguageSettings` — язык интерфейса · `STABLE · Q-17`
+#### `getLanguageSettings` — язык интерфейса · `STABLE`
 
 ```ts
 getLanguageSettings(): Promise<Result<LanguageSettings>>
@@ -495,10 +495,10 @@ type LanguageSettings = { current: string; available: { code: string; title: str
 | `available[].title` | строка | `[SCREEN]` `ChoiceList.items[].title` |
 
 - **Зачем:** `[SOURCE]` N41 Change Language.
-- Какие языки — `OPEN`: вопрос Q-17. Структура от этого не зависит.
+- Какие языки — решено D-49 (UI): `ru` и `en`, по умолчанию `ru`. Структура не менялась.
 - Ошибки: `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
-#### `setLanguage` — сменить язык · `STABLE · Q-17`
+#### `setLanguage` — сменить язык · `STABLE`
 
 ```ts
 setLanguage(req: { code: string }): Promise<Result<void>>
@@ -535,8 +535,8 @@ setLanguage(req: { code: string }): Promise<Result<void>>
 | `findRecipientBanks` | J | PAY-04 / C, D | `{ phone }` | `Bank[]` | DECISION D-06 | `findRecipientBanks` | STABLE |
 | `getSbpDefaultBank` | J | SBP-03 / D | — | `{ isDefault }` | SOURCE N16; DECISION D-06, D-17 | `getSbpDefaultBank` | STABLE |
 | `setSbpDefaultBank` | J | SBP-03 / D | — | — | DECISION D-06, D-08, D-17 | `setSbpDefaultBank` | STABLE · CQ-05 |
-| `getLanguageSettings` | K | SET-04 / E | — | `LanguageSettings` | SOURCE N41 | `getLanguageSettings` | STABLE · Q-17 |
-| `setLanguage` | K | SET-04 / E | `{ code }` | — | SOURCE N41 | `setLanguage` | STABLE · Q-17 |
+| `getLanguageSettings` | K | SET-04 / E | — | `LanguageSettings` | SOURCE N41 | `getLanguageSettings` | STABLE |
+| `setLanguage` | K | SET-04 / E | `{ code }` | — | SOURCE N41 | `setLanguage` | STABLE |
 
 **Условные поля регистрации:**
 
@@ -668,7 +668,7 @@ interface BankingAdapter {
 | ~~CQ-08~~ | ~~С какого счёта списывается перевод~~ | Решено — D-24: с одного конкретного счёта, поле обязательно | — | `TransferRequest.sourceAccountId` |
 | ~~CQ-09~~ | ~~Значения `AccountSummary.status`~~ | Решено — D-25: `active` \| `blocked`; `blocked` нельзя указать счётом списания | — | `AccountStatus`; `STATE_CONFLICT` в `confirmTransfer` |
 | ~~CQ-10~~ | ~~`STATE_CONFLICT` в списках ошибок операций регистрации~~ | Решено — D-29: общее правило G-10; `STATE_CONFLICT` дописан к `sendEmailCode`, `setMpin`, `requestOtp` | — | Сигнатуры не менялись |
-| Q-17 | Какие языки интерфейса | OPEN | Нет | Структура есть, значения не заданы |
+| ~~Q-17~~ | ~~Какие языки интерфейса~~ | Решено — D-49: `ru`, `en` | Нет | Структура не менялась |
 
 Вопросы Q-10 и Q-11 из UI-спецификации остаются открытыми: Q-10 контракт не затрагивает, Q-11 исключён целиком. Q-16 закрыт решением D-32 без изменений контракта.
 

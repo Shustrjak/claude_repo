@@ -334,7 +334,7 @@ AppShell(main)
 SET-04 Change Language
 AppShell(main)
 ├── AppHeader(back)
-└── ChoiceList(items = языки)      (Q-17)
+└── ChoiceList(items = языки)      ru «Русский», en «English» [D-49]
 ```
 
 ---
