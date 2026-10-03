@@ -318,28 +318,30 @@ changeMpin(req: { newMpin: string }): Promise<Result<void>>
 
 ### G. Счёт
 
-#### `getAccountSummary` — счёт клиента · `NEEDS_DECISION · CQ-02, CQ-03`
+#### `getAccounts` — счета клиента · `STABLE`
 
 ```ts
-getAccountSummary(): Promise<Result<AccountSummary | null>>
-type AccountSummary = { name: string; maskedNumber: string; balance: Money; status: "active" | "blocked" };
+getAccounts(): Promise<Result<AccountSummary[]>>
+type AccountSummary = { id: string; name: string; maskedNumber: string; balance: Money; status: "active" | "blocked" };
 ```
 
 | Поле | Тип | Происхождение |
 |---|---|---|
+| `id` | строка | `[TECHNICAL]` стабильный ключ элемента списка; не показывается. Ничего не выбирает и не означает «основной счёт» |
 | `name` | строка | `[SCREEN]` `AccountCard.name` |
 | `maskedNumber` | строка | `[SCREEN]` `AccountCard.maskedNumber` |
 | `balance` | `Money` | `[SCREEN]` `AccountCard.balance` «сумма и валюта» |
 | `status` | `"active" \| "blocked"` | `[SCREEN]` `AccountCard.status`, `StatusBadge`; значения — из состояний `AccountCard` «обычное, счёт заблокирован» |
 
-- **Зачем:** `[DECISION]` D-07 включает «счета» в первую часть контракта.
-- **Почему `NEEDS_DECISION`.** Поля взяты из утверждённого компонента `AccountCard`, но единственное место, где он стоит, — главная HOME-01, и там это предложение `[A]`. ACC-01 — SOURCE_REQUIRED. Будет ли операция и вернёт ли она один счёт или список, решают CQ-02 и CQ-03.
-- Реквизиты счёта не входят: ACC-01 — SOURCE_REQUIRED. `null` — счёта нет (так отвечает `NullAdapter`).
+- **Зачем:** `[DECISION]` D-21 — главной нужны минимальные данные счёта; D-22 — счетов у клиента может быть несколько.
+- Ответ — список из нуля, одного или нескольких счетов. Пустой список — счетов нет (так отвечает `NullAdapter`).
+- В контракте нет признаков «основной» или «по умолчанию» и выбора счёта. Какие счета показывает главная — вопрос UI, не контракта (Q-29).
+- Реквизиты и действия со счётом не входят: ACC-01 — SOURCE_REQUIRED, D-21 его не открывает.
 - Ошибки: `SESSION_EXPIRED`, `UNKNOWN`.
 
 ### H. Операции по счёту (мини-выписка)
 
-#### `getRecentTransactions` — последние операции · `STABLE · CQ-03`
+#### `getRecentTransactions` — последние операции · `STABLE · CQ-07`
 
 ```ts
 getRecentTransactions(req: { limit: number }): Promise<Result<Transaction[]>>
@@ -356,7 +358,8 @@ type Transaction = { id: string; title: string; date: string; amount: Money; sta
 | `status` | `"success" \| "pending" \| "failure"` | `[SCREEN]` `TransactionRow.status` → `StatusBadge` |
 
 - **Зачем:** `[SOURCE]` N20 Mini Statement; `[SCREEN]` ACC-02 `TransactionList(compact)`.
-- Подробная выписка (ACC-03) не входит: SOURCE_REQUIRED. Если по CQ-03 счетов станет несколько, добавится необязательный параметр счёта — это не сломает операцию.
+- Подробная выписка (ACC-03) не входит: SOURCE_REQUIRED.
+- Сигнатура не менялась: в утверждённом UI мини-выписка (ACC-02) не выбирает счёт. При нескольких счетах (D-22) неясно, чьи операции она показывает, — CQ-07. Ответ «по выбранному счёту» добавит необязательный параметр и ничего не сломает.
 - Ошибки: `SESSION_EXPIRED`, `UNKNOWN`.
 
 ### I. Платежи (ядро)
@@ -378,7 +381,7 @@ type TransferLimits = { min: Money; max: Money };
 
 Ошибки: `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
-#### `confirmTransfer` — подтвердить перевод · `STABLE · CQ-01, CQ-04, CQ-06`
+#### `confirmTransfer` — подтвердить перевод · `STABLE · CQ-01, CQ-04, CQ-06, CQ-08`
 
 ```ts
 confirmTransfer(req: TransferRequest): Promise<Result<TransferResult>>
@@ -411,6 +414,7 @@ type TransferResult = { status: "success" | "pending" };
 
 - **Зачем:** `[FLOW]` C — PST-01 → PST-02; `[DECISION]` D-13.
 - Отдельной «подготовки платежа» нет: PST-01 показывает данные, которые уже есть у формы. Существует ли получатель, адаптер проверяет здесь (G-2).
+- Счёта списания в запросе нет: в утверждённом UI его не выбирают. При нескольких счетах (D-22) это неясность — CQ-08. До ответа контракт её не решает.
 - `failure` на PST-02 — это `ok: false` с кодом ошибки.
 - Ошибки: `MPIN_INVALID`, `AMOUNT_OUT_OF_LIMITS`, `INSUFFICIENT_FUNDS`, `RECIPIENT_NOT_FOUND`, `VALIDATION_FAILED`, `SESSION_EXPIRED`, `UNAVAILABLE`, `UNKNOWN`.
 
@@ -508,10 +512,10 @@ setLanguage(req: { code: string }): Promise<Result<void>>
 | `verifyEmailCode` | E | AUTH-05 / B | `{ code }` | — | DECISION D-19 | `verifyEmailCode` | STABLE |
 | `setMpin` | F | AUTH-06 / B | `{ mpin }` | — | SOURCE N09; DECISION D-09 | `setMpin` | STABLE |
 | `changeMpin` | F | SET-02 / E | `{ newMpin }` | — | SOURCE N39; DECISION D-09, D-10 | `changeMpin` | STABLE |
-| `getAccountSummary` | G | HOME-01 [A] | — | `AccountSummary \| null` | DECISION D-07; SCREEN `AccountCard` | `getAccountSummary` | NEEDS_DECISION · CQ-02, CQ-03 |
-| `getRecentTransactions` | H | ACC-02 / G | `{ limit }` | `Transaction[]` | SOURCE N20; SCREEN ACC-02 | `getRecentTransactions` | STABLE · CQ-03 |
+| `getAccounts` | G | HOME-01 | — | `AccountSummary[]` | DECISION D-07, D-21, D-22; SCREEN `AccountCard` | `getAccounts` | STABLE |
+| `getRecentTransactions` | H | ACC-02 / G | `{ limit }` | `Transaction[]` | SOURCE N20; SCREEN ACC-02 | `getRecentTransactions` | STABLE · CQ-07 |
 | `getTransferLimits` | I | PAY-04, PAY-06 / C | `{ method }` | `TransferLimits` | SCREEN `PaymentForm.limits` | `getTransferLimits` | STABLE |
-| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13 | `confirmTransfer` | STABLE · CQ-01, CQ-04, CQ-06 |
+| `confirmTransfer` | I | PST-01 → PST-02 / C | `TransferRequest` | `TransferResult` | FLOW C; DECISION D-01, D-06, D-09, D-13 | `confirmTransfer` | STABLE · CQ-01, CQ-04, CQ-06, CQ-08 |
 | `findRecipientBanks` | J | PAY-04 / C, D | `{ phone }` | `Bank[]` | DECISION D-06 | `findRecipientBanks` | STABLE |
 | `getSbpDefaultBank` | J | SBP-03 / D | — | `{ isDefault }` | SOURCE N16; DECISION D-06, D-17 | `getSbpDefaultBank` | STABLE |
 | `setSbpDefaultBank` | J | SBP-03 / D | — | — | DECISION D-06, D-08, D-17 | `setSbpDefaultBank` | STABLE · CQ-05 |
@@ -554,7 +558,7 @@ interface BankingAdapter {
   setMpin(req: { mpin: string }): Promise<Result<void>>;
   changeMpin(req: { newMpin: string }): Promise<Result<void>>;
   // G–H. Счёт и операции
-  getAccountSummary(): Promise<Result<AccountSummary | null>>;
+  getAccounts(): Promise<Result<AccountSummary[]>>;
   getRecentTransactions(req: { limit: number }): Promise<Result<Transaction[]>>;
   // I. Платежи
   getTransferLimits(req: { method: TransferMethod }): Promise<Result<TransferLimits>>;
@@ -571,8 +575,7 @@ interface BankingAdapter {
 
 | Метод | `NullAdapter` | `DemoAdapter` | `FutureRealBankAdapter` |
 |---|---|---|---|
-| `getAccountSummary` | `null` | Демо-счёт из JSON | Запрос к банку |
-| `getRecentTransactions`, `findRecipientBanks` | `[]` | Демо-данные из JSON | Запрос к банку |
+| `getAccounts`, `getRecentTransactions`, `findRecipientBanks` | `[]` | Демо-данные из JSON; у `getAccounts` — ноль, один или несколько счетов | Запрос к банку |
 | `getTransferLimits`, `getSbpDefaultBank`, `getLanguageSettings` | `UNAVAILABLE` (пустого значения нет, G-6) | Демо-данные из JSON | Запрос к банку |
 | Все действия | `UNAVAILABLE` | Имитация по демо-правилам | Запрос к банку |
 
@@ -620,16 +623,18 @@ interface BankingAdapter {
 
 ## 10. Открытые вопросы контракта
 
-Ни один вопрос не блокирует v1, кроме раздела G.
+Ни один открытый вопрос не меняет существующие сигнатуры: ответы могут только добавить поля или операции.
 
 | № | Вопрос | Статус | Блокирует v1? | Сейчас в контракте |
 |---|---|---|---|---|
 | CQ-01 | Обязательны ли квартира в адресе и комментарий к переводу? | NEEDS_DECISION | Нет: меняется только проверка | Поля есть, обязательность не задана |
-| CQ-02 | Показывать ли на главной (HOME-01) карточку счёта и мини-выписку? В композиции это предложения `[A]`, хотя D-07 включает счета | NEEDS_DECISION | **Да, для раздела G** | `getAccountSummary` — NEEDS_DECISION |
-| CQ-03 | Может ли счетов быть больше одного? UI показывает одну `AccountCard` и не даёт выбрать счёт списания | NEEDS_DECISION | **Да, для раздела G**: от ответа зависит сигнатура `getAccountSummary` | Один счёт; счёт списания выбирает адаптер |
+| ~~CQ-02~~ | ~~Нужны ли данные счёта в v1~~ | Решено — D-21 | — | `getAccounts`; ACC-01 по-прежнему SOURCE_REQUIRED |
+| ~~CQ-03~~ | ~~Сколько счетов у клиента~~ | Решено — D-22: может быть несколько | — | `getAccounts` возвращает список |
 | CQ-04 | Что дальше, если перевод «в обработке» (`pending`)? Уточнения статуса в UI нет | NEEDS_DECISION | Нет: ответ может только добавить операцию | `pending` — конечный ответ для PST-02 |
 | CQ-05 | Можно ли снять настройку «банк по умолчанию»? | NEEDS_DECISION | Нет: ответ может только добавить операцию | Только `setSbpDefaultBank` |
 | CQ-06 | Нужно ли ФИО получателя при переводе по реквизитам? В UI его нет | NEEDS_DECISION | Нет: ответ может только добавить поле | Не передаётся |
+| CQ-07 | При нескольких счетах (D-22) чьи операции показывает мини-выписка (ACC-02): всех счетов или одного? В UI выбора счёта нет | NEEDS_DECISION | Нет: ответ «одного» добавит необязательный параметр | Сигнатура без счёта; какие операции вернуть, решает адаптер |
+| CQ-08 | При нескольких счетах (D-22) с какого счёта списывается перевод? В UI выбора счёта списания нет | NEEDS_DECISION | Нет, если поле будет необязательным; если выбор счёта станет обязательным — добавится обязательное поле в `confirmTransfer` | Поля нет |
 | Q-17 | Какие языки интерфейса | OPEN | Нет | Структура есть, значения не заданы |
 
 Вопросы Q-10, Q-11 и Q-16 из UI-спецификации остаются открытыми: Q-10 и Q-16 контракт не затрагивают, Q-11 исключён целиком.
@@ -643,4 +648,5 @@ interface BankingAdapter {
 - Коды ошибок: `NOT_REGISTERED`, `OTP_REQUIRED` и `EMAIL_NOT_VERIFIED` объединены в `STATE_CONFLICT`; `OTP_INVALID` и `EMAIL_CODE_INVALID` — в `CODE_INVALID`. Было 14 кодов, стало 11.
 - Все операции асинхронные (`Promise<Result<T>>`).
 - `getAccountSummary` переведена в `NEEDS_DECISION`.
+- **Поправка после D-21 и D-22:** `getAccountSummary(): AccountSummary | null` заменена на `getAccounts(): AccountSummary[]`; добавлено техническое поле `AccountSummary.id`; операция стала `STABLE`. Вопросы CQ-02 и CQ-03 закрыты, добавлены CQ-07 и CQ-08. Сигнатура `getRecentTransactions` не менялась.
 - Названия операций и состав полей не менялись.

@@ -152,7 +152,7 @@
 | `StatusBadge` | Внутри `TransactionRow`, `BankCard`, `AccountCard`, `OperationStatus` | — | — |
 | `PaymentMethodSelector` | SBP-01 | 1 | C, D |
 | `QRScanner` | PAY-03 | 1 | C, D, H |
-| `AccountCard` | HOME-01 [A] | 0–1 | G |
+| `AccountCard` | HOME-01 [D-21] | 1 | G |
 | `BankCard` | CARD-01 — SOURCE_REQUIRED [D-20] | 0 | — |
 | `ServiceTile` | HOME-04 [A] | 0–1 | G |
 | `NotificationItem` | NOTIF-01 — SOURCE_REQUIRED (Q-11) | 0 | — |
@@ -165,7 +165,7 @@
 |---|---|---|
 | `QRScanner` | PAY-03 | Работа с камерой: доступ, ошибки, распознавание. Открывается и из СБП, и из нижней навигации |
 | `PaymentMethodSelector` | SBP-01 | Способ перевода — понятие домена платежей, а не экрана. Содержимое PAY-01 неизвестно (Q-11) |
-| `AccountCard` | HOME-01 [A] | Счёт — доменная сущность. Содержимое ACC-01 неизвестно (Q-11) |
+| `AccountCard` | HOME-01 [D-21] | Счёт — доменная сущность. Содержимое ACC-01 неизвестно (Q-11) |
 | `ServiceTile` | HOME-04 [A] | Один из двух вариантов вида меню, второй — `ListRow` |
 | `NotificationItem`, `SearchResult`, `BankCard` | Нет | Ждут источника для NOTIF-01, HOME-02 и CARD-01 (Q-11, [D-20]). Входных данных не проектируем |
 | `RecipientSelector` | Нет | Не входит в v1 [D-12] |

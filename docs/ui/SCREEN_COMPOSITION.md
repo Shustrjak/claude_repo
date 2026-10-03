@@ -107,7 +107,7 @@ HOME-01 Home
 AppShell(main)
 ├── AppHeader(actions = поиск, уведомления, профиль)   [A]
 ├── AsyncContent
-│   ├── AccountCard                                    [A]
+│   ├── AccountCard × N                                [D-21, D-22]; какие счета показывать — Q-29
 │   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10)
 └── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 ```
@@ -366,7 +366,7 @@ AppShell(main)
 | AUTH-05 | ● | | ● | | | | | | | | `Input`, `Checkbox` |
 | AUTH-06 | ● | ● | | | | ● | | | | | — |
 | AUTH-07 | | | ● | | | | | | | | — |
-| HOME-01 | | | | | | ○ | ● | | | | `AccountCard` ○, `TransactionList` ○ |
+| HOME-01 | | | | | | ○ | ● | | | | `AccountCard`, `TransactionList` ○ |
 | HOME-02 | | | | | | | | | | | SOURCE_REQUIRED |
 | HOME-03 | | | | | | | | | | | SOURCE_REQUIRED |
 | HOME-04 | | | | | | ● | | | | | `ServiceTile` ○ |
