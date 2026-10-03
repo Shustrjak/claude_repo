@@ -1,0 +1,15 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--color-light-base-bg-primary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-16, 16px);
+  padding: 0 var(--gap-16, 16px) var(--gap-24, 24px);
+}

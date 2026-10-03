@@ -73,6 +73,8 @@
 
 ## Слой B — семантические компоненты
 
+**В коде** [D-30]: примитивы — `src/components/primitives.ts` (реэкспорт пакетов Alfa); `MPINInput`, `AuthMethodSelector`, `ListRow` (пока только `link`), `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами.
+
 Подробно — в [SEMANTIC_COMPONENTS.md](SEMANTIC_COMPONENTS.md).
 
 | # | Компонент | Коротко |

@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
+import "@alfalab/core-components-vars/index.css";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
+import { AppSessionProvider } from "./app/AppSessionProvider";
 import { BankingAdapterProvider } from "./app/BankingAdapterProvider";
 import { createBankingAdapter } from "./app/createBankingAdapter";
 import { router } from "./app/router";
@@ -16,7 +18,9 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <BankingAdapterProvider adapter={adapter}>
-      <RouterProvider router={router} />
+      <AppSessionProvider>
+        <RouterProvider router={router} />
+      </AppSessionProvider>
     </BankingAdapterProvider>
   </StrictMode>,
 );

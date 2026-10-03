@@ -1,0 +1,14 @@
+/* PureCell rendered as <button>: drop the browser's button chrome. */
+.row {
+  width: 100%;
+  padding-inline: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.row:disabled {
+  cursor: default;
+}
