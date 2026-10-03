@@ -108,7 +108,7 @@ AppShell(main)
 ├── AppHeader(actions = поиск, уведомления, профиль)   [A]
 ├── AsyncContent
 │   ├── AccountCard × N                                [D-21, D-22]; какие счета показывать — Q-29
-│   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10)
+│   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10); по одному счёту [D-23], какому — Q-30
 └── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 ```
 
@@ -150,6 +150,7 @@ AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
     └── TransactionList(variant=compact)   [S — «Mini Statement»]
+    (операции одного счёта: accountId приходит с переходом [D-23]; выбора счёта на экране нет; Q-30)
 ```
 
 ```
@@ -198,6 +199,7 @@ PAY-04 Pay to Mobile Number
 AppShell(main)
 ├── AppHeader(back)
 ├── PaymentForm(recipientType=mobile)
+│   ├── ChoiceList(items = счета)     счёт списания — только при нескольких счетах; при одном счёт подставляет флоу [D-24]
 │   ├── RecipientInput(type=mobile)   (телефон + банк получателя [D-06])
 │   ├── AmountInput
 │   └── Input(комментарий)
@@ -355,7 +357,7 @@ AppShell(main)
 | PS | `PaymentSummary` |
 | Другие | Остальные компоненты |
 
-`AppShell` и `AppHeader` есть везде, в таблицу не включены. У экранов с `SOURCE_REQUIRED` (Q-11, [D-20]) компонентов нет: их содержимое не проектируется.
+`AppShell` и `AppHeader` есть везде, в таблицу не включены. `ChoiceList` на PAY-04 и PAY-06 — выбор счёта списания внутри `PaymentForm`, только при нескольких счетах [D-24]. У экранов с `SOURCE_REQUIRED` (Q-11, [D-20]) компонентов нет: их содержимое не проектируется.
 
 | Экран | AB | MP | OTP | CL | OS | LR | AC | SM | PF | PS | Другие |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -377,8 +379,8 @@ AppShell(main)
 | PAY-01 | | | | | | | | | | | SOURCE_REQUIRED |
 | PAY-02 | | | | | | | | | | | SOURCE_REQUIRED |
 | PAY-03 | | | | | | | | ○ | ○ | | `QRScanner` |
-| PAY-04 | ● | | | | | | | | ● | ○ | `RecipientInput` |
-| PAY-06 | ● | | | | | | | | ● | ○ | `RecipientInput` |
+| PAY-04 | ● | | | ● | | | | | ● | ○ | `RecipientInput` |
+| PAY-06 | ● | | | ● | | | | | ● | ○ | `RecipientInput` |
 | SBP-01 | | | | | | ● | | | | | `PaymentMethodSelector` |
 | SBP-03 | ○ | | | | ○ | ○ | | | | | — |
 | CARD-01 | | | | | | | | | | | SOURCE_REQUIRED |
