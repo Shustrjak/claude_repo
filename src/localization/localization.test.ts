@@ -4,6 +4,7 @@ import { accountsFailure } from "../screens/home/homeStatus";
 import { loginFailure } from "../screens/auth/loginFailure";
 import { statusFor } from "../screens/auth/registrationStatus";
 import { settingsStatusFor } from "../screens/settings/settingsStatus";
+import { formatDayMonth } from "./format";
 import { APP_LANGUAGES, DEFAULT_LANGUAGE, isAppLanguage, LANGUAGE_NAMES } from "./languages";
 import { MESSAGES } from "./messages";
 
@@ -62,5 +63,23 @@ describe("status helpers follow the language and hide codes", () => {
       message: "Wrong MPIN. Please try again.",
     });
     expect(statusFor({ code: "UNAVAILABLE" }, MESSAGES.ru).title).toBe("Банк сейчас недоступен");
+  });
+});
+
+describe("transaction date presentation (D-53)", () => {
+  const ISO = "2026-09-28T18:42:00Z";
+
+  it("is day and month in the interface language, no year, no time", () => {
+    expect(formatDayMonth(ISO, "ru", "UTC")).toBe("28 сентября");
+    expect(formatDayMonth(ISO, "en", "UTC")).toBe("September 28");
+  });
+
+  it("uses the given time zone for the calendar day, the value itself is untouched", () => {
+    expect(formatDayMonth("2026-09-28T23:30:00Z", "ru", "Asia/Tokyo")).toBe("29 сентября");
+    expect(formatDayMonth("2026-09-28T23:30:00Z", "en", "America/New_York")).toBe("September 28");
+  });
+
+  it("shows an unreadable value as it came", () => {
+    expect(formatDayMonth("not a date", "en")).toBe("not a date");
   });
 });

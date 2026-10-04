@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import type { AccountSummary, ContractError } from "../../adapters/banking/types";
 import { useBankingAdapter } from "../../app/BankingAdapterContext";
+import { accountTransactionsPath } from "../../app/paths";
 import { AppHeader } from "../../components/global/AppHeader";
 import { AppShell } from "../../components/global/AppShell";
 import { AccountCard } from "../../components/semantic/AccountCard";
@@ -17,12 +19,13 @@ type Accounts =
 
 /**
  * HOME-01: every account `getAccounts()` returns, as `AccountCard` × N in the adapter's order (D-47).
- * No sorting, filtering or "main" account; an empty list is a valid, empty home. Cards only show
- * data: how ACC-02 opens is Q-30. The mini statement (Q-10, Q-30) and header actions are absent.
+ * No sorting, filtering or "main" account; an empty list is a valid, empty home. A card opens its
+ * own account's mini statement (D-51); Home shows no operations itself (D-52). No header actions.
  */
 export function HomeScreen() {
   const adapter = useBankingAdapter();
   const t = useMessages();
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState<Accounts>({ status: "loading" });
   const [request, setRequest] = useState(0);
 
@@ -69,6 +72,8 @@ export function HomeScreen() {
                   maskedNumber={account.maskedNumber}
                   balance={account.balance}
                   status={account.status}
+                  // D-51: the whole card opens this account's mini statement, blocked or not.
+                  onPress={() => navigate(accountTransactionsPath(account.id))}
                 />
               </li>
             ))}

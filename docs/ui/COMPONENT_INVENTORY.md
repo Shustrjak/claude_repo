@@ -73,7 +73,7 @@
 
 ## Слой B — семантические компоненты
 
-**В коде** [D-30, D-39, D-42, D-46, D-48]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `AccountCard`, `AsyncContent`, `ListRow` (`link`, `toggle`, `danger`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusBadge`, `StatusMessage` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад»), `BottomNavigation` — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами. Тексты компонентов и экранов — из словарей `src/localization/` (`ru`, `en`) через `useMessages()` [D-50].
+**В коде** [D-30, D-39, D-42, D-46, D-48, D-54]: примитивы — `src/components/primitives.ts` (реэкспорт нужных пакетов Alfa); `ActionButton`, `AuthMethodSelector`, `ChoiceList`, `AccountCard`, `AsyncContent`, `ListRow` (`link`, `toggle`, `danger`), `MPINInput`, `OperationStatus`, `OTPVerification`, `StatusBadge`, `StatusMessage`, `TransactionList` (`compact`), `TransactionRow` — `src/components/semantic/`; `AppShell`, `AppHeader` (с кнопкой «назад»), `BottomNavigation` — `src/components/global/`. Остальные компоненты появятся вместе со своими экранами. Тексты компонентов и экранов — из словарей `src/localization/` (`ru`, `en`) через `useMessages()` [D-50].
 
 Подробно — в [SEMANTIC_COMPONENTS.md](SEMANTIC_COMPONENTS.md).
 
@@ -149,7 +149,7 @@
 | `OTPVerification` | AUTH-07 (OTP онбординга), SET-02 (OTP чувствительной операции) [D-10], AUTH-05 (код подтверждения почты) [D-19] | 3 | B, E |
 | `AuthMethodSelector` | AUTH-01, PST-01 [D-13] | 2 | A, C |
 | `PaymentConfirmation` | PST-01 — общий шаг для PAY-04, PAY-06; PAY-03 [A] | 1 состояние, 3 флоу | C, D |
-| `TransactionList` | ACC-02; HOME-01 [A] | 1–2 | G |
+| `TransactionList` | ACC-02; на HOME-01 нет [D-52] | 1 | G |
 | `TransactionRow` | Внутри `TransactionList` | 1–2 | G |
 | `StatusBadge` | Внутри `TransactionRow`, `BankCard`, `AccountCard`, `OperationStatus` | — | — |
 | `PaymentMethodSelector` | SBP-01 | 1 | C, D |

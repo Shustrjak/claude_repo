@@ -14,7 +14,8 @@ export type AsyncContentState =
 
 type Props = {
   state: AsyncContentState;
-  empty: Message;
+  /** Needed only when the state can be `empty`. */
+  empty?: Message;
   /** Shown as ActionButton(retry) in the error message. */
   onRetry?: () => void;
   children?: ReactNode;
@@ -39,7 +40,7 @@ export function AsyncContent({ state, empty, onRetry, children }: Props) {
         />
       );
     case "empty":
-      return <StatusMessage kind="empty" {...empty} />;
+      return empty ? <StatusMessage kind="empty" {...empty} /> : null;
     case "data":
       return children;
   }

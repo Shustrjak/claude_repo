@@ -52,6 +52,19 @@ export const ru = {
   account: {
     blocked: "Заблокирован",
   },
+  transactions: {
+    list: "Операции",
+    empty: "Операций пока нет",
+    pending: "В обработке",
+    failure: "Отклонена",
+  },
+  statement: {
+    title: "Мини-выписка",
+    notLoaded: "Не удалось загрузить операции.",
+    loadFailed: "Не удалось загрузить операции",
+    unknownAccount: "Не удалось открыть операции этого счёта",
+    backHome: "Вернитесь на главную.",
+  },
   login: {
     title: "Вход",
     openAccount: "Открыть счёт",

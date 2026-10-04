@@ -51,6 +51,19 @@ export const en: Messages = {
   account: {
     blocked: "Blocked",
   },
+  transactions: {
+    list: "Transactions",
+    empty: "No transactions yet",
+    pending: "Pending",
+    failure: "Declined",
+  },
+  statement: {
+    title: "Mini statement",
+    notLoaded: "Could not load the transactions.",
+    loadFailed: "Could not load the transactions",
+    unknownAccount: "Could not open this account's transactions",
+    backHome: "Go back to Home.",
+  },
   login: {
     title: "Sign in",
     openAccount: "Open an account",

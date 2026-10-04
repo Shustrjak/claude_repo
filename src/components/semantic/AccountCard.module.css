@@ -2,9 +2,24 @@
   display: flex;
   flex-direction: column;
   gap: var(--gap-4, 4px);
+  box-sizing: border-box;
+  width: 100%;
   padding: var(--gap-16, 16px);
   border-radius: var(--border-radius-16, 16px);
   background: var(--color-light-neutral-100, #f3f4f5);
+}
+
+.button {
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-light-accent-primary, #ef3124);
+  outline-offset: 2px;
 }
 
 .head {
@@ -17,4 +32,8 @@
 
 .name {
   overflow-wrap: anywhere;
+}
+
+.line {
+  display: block;
 }

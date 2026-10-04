@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate, type RouteObject } from "react-router";
+import { MiniStatementRoute } from "../screens/accounts/MiniStatementScreen";
 import { OpenAccountScreen } from "../screens/accounts/OpenAccountScreen";
 import { BindSimScreen } from "../screens/auth/BindSimScreen";
 import { LoginScreen } from "../screens/auth/LoginScreen";
@@ -53,6 +54,7 @@ export const routes: RouteObject[] = [
       { path: paths.changeMpin, element: <ChangeMpinScreen /> },
       { path: paths.biometricSettings, element: <BiometricSettingsScreen /> },
       { path: paths.languageSettings, element: <LanguageSettingsScreen /> },
+      { path: paths.accountTransactions, element: <MiniStatementRoute /> },
     ],
   },
   { path: "*", element: <Navigate to={paths.login} replace /> },

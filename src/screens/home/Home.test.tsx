@@ -89,24 +89,24 @@ describe("HOME-01 accounts (D-47)", () => {
     const [blocked, ...active] = cards() as [HTMLElement, ...HTMLElement[]];
     expect(blocked.getAttribute("aria-label")).toBe("Яхта");
     expect(within(blocked).getByText("Заблокирован")).toBeTruthy();
-    expect(within(blocked).queryAllByRole("button")).toHaveLength(0);
+    // The only control is the card itself (D-51): no unblock, contact or other remediation action.
+    expect(within(blocked).getAllByRole("button")).toHaveLength(1);
+    expect(within(blocked).getByRole("button").textContent).toContain("Яхта");
     expect(within(blocked).queryAllByRole("link")).toHaveLength(0);
     for (const card of active) expect(within(card).queryByText("Заблокирован")).toBeNull();
     expect(screen.getAllByText("Заблокирован")).toHaveLength(1);
   });
 
-  it("cards are presentation only: no button or link, a click goes nowhere, no special account", async () => {
-    const user = userEvent.setup();
+  it("each card is exactly one button (D-51), nothing nested; rendering Home fetches no operations (D-52)", async () => {
     const { adapter, otherCalls } = bankWithAccounts(async () => ok(UNSORTED));
-    const { router } = openHome(adapter);
+    openHome(adapter);
     await screen.findByRole("list", { name: "Счета" });
     const list = screen.getByRole("list", { name: "Счета" });
-    expect(within(list).queryAllByRole("button")).toHaveLength(0);
+    expect(within(list).getAllByRole("button")).toHaveLength(UNSORTED.length);
+    for (const card of cards()) expect(within(card).getAllByRole("button")).toHaveLength(1);
     expect(within(list).queryAllByRole("link")).toHaveLength(0);
-    for (const card of cards()) await user.click(card);
-    expect(router.state.location.pathname).toBe("/home");
     expect(text(list)).not.toMatch(/основн|по умолчанию|предпочт|выбран/i);
-    // Q-30 is open: no mini statement, so no transaction fetch; nothing else is asked either.
+    // No mini statement on Home: no transaction fetch; nothing else is asked either.
     expect(otherCalls).toEqual(["getLanguageSettings"]); // the app's own language load (D-49)
   });
 
