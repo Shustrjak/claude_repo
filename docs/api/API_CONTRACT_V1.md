@@ -365,7 +365,7 @@ type Transaction = { id: string; title: string; date: string; amount: Money; sta
 - **Зачем:** `[SOURCE]` N20 Mini Statement; `[SCREEN]` ACC-02 `TransactionList(compact)`.
 - Подробная выписка (ACC-03) не входит: SOURCE_REQUIRED.
 - **Счёт — ровно один** `[DECISION]` D-23. Возвращаются только операции счёта `accountId`. Операции разных счетов не объединяются: сводной выписки, общей ленты и сводного баланса нет.
-- Какой счёт показывает ACC-02, контракт не решает: `accountId` приходит из перехода на экран (состояние приложения), см. Q-30. С вопросом Q-29 (какие счета на главной) это не связано.
+- Какой счёт показывает ACC-02, контракт не решает: `accountId` приходит из перехода на экран (адрес экрана), решено D-51; ACC-02 запрашивает `limit: 10` (D-53). С вопросом Q-29 (какие счета на главной) это не связано.
 - Неизвестный или чужой `accountId` — `VALIDATION_FAILED` с `fields: ["accountId"]`.
 - Ошибки: `VALIDATION_FAILED`, `SESSION_EXPIRED`, `UNKNOWN`.
 

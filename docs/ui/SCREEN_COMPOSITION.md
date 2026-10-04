@@ -108,7 +108,7 @@ AppShell(main)
 ├── AppHeader(actions = поиск, уведомления, профиль)   [A]
 ├── AsyncContent
 │   ├── AccountCard × N                                [D-21, D-22]; все счета, в порядке адаптера [D-47]
-│   └── TransactionList(variant=compact)  или ссылка на ACC-02 (Q-10); по одному счёту [D-23], какому — Q-30
+│   (TransactionList на главной нет [D-52]; AccountCard → ACC-02 своего счёта [D-51])
 └── ListRow(link) → ACC-03, HOME-04 Menu               [A]  (раскладка по D-04)
 ```
 
@@ -150,7 +150,8 @@ AppShell(main)
 ├── AppHeader(back)
 └── AsyncContent
     └── TransactionList(variant=compact)   [S — «Mini Statement»]
-    (операции одного счёта: accountId приходит с переходом [D-23]; выбора счёта на экране нет; Q-30)
+    (операции одного счёта: accountId — в адресе /accounts/:accountId/transactions [D-23, D-51];
+     выбора счёта на экране нет; limit 10, порядок адаптера, дата по языку [D-53])
 ```
 
 ```
